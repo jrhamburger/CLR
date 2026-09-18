@@ -13,7 +13,6 @@ packages/
     React-frontend/
     Express-backend/
 
-
 ## Conventions
 - Follow ESLint/Prettier rules in each package
 - [Add naming conventions, folder structure rules as they emerge]
