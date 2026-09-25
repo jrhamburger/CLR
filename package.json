@@ -12,5 +12,8 @@
   },
   "scripts": {
     "format": "prettier --write './**/*.{js,jsx,ts,tsx,css,md,json}' --config ./.prettierrc"
+  },
+  "dependencies": {
+    "framer-motion": "^13.4.0"
   }
 }
