@@ -26,3 +26,8 @@ Style rules (see .prettierrc):
 ## Pull Requests
 - Open a PR into `main` before merging
 - At least one teammate reviews before merge
+
+## Sprint 1
+- Quality attributes Sprint 1 focus
+- Reliability - Make sure the app runs smoothly and does it's function
+- Usability - Be sure to think about what features might overcomplicate the system to user
