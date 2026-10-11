@@ -1,0 +1,32 @@
+.mini-player {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+
+    position: fixed;
+    bottom: 0%;
+    left: 0%;
+    right: 0%;
+
+    background-color: black;
+    padding: 10px;
+}
+
+
+.music-controls {
+    display: flex;
+    flex-direction: row;
+    gap: 10px;
+}
+
+.progress-row {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    width: min(80vw, 600px);
+    gap: 10px;
+}
+
+.seek-bar {
+    flex: 1;
+}

@@ -10,7 +10,9 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@phosphor-icons/react": "^2.1.10",
     "@supabase/supabase-js": "^2.117.2",
+    "framer-motion": "^14.1.0",
     "react": "^19.2.8",
     "react-dom": "^19.2.8"
   },
