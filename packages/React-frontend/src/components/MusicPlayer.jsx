@@ -3,12 +3,14 @@ import { useRef, useState, useEffect } from "react";
 import MusicControls from "./MusicControls";
 
 
-function MusicPlayer({ currentQueue, currentIndex, onFileUpload }) {
+function MusicPlayer({ currentQueue, playOrder, playPosition, onFileUpload }) {
     const audioRef = useRef(null);
     const [isPlaying, setIsPlaying] = useState(false);
     const [currentTime, setCurrentTime] = useState(0);
     const [duration, setDuration] = useState(0);
-    let currentSong = currentQueue[currentIndex];
+
+    const currentTrackIndex = playOrder[playPosition];
+    const currentSong = currentQueue[currentTrackIndex];
 
     // useEffect(() => {
     //     setCurrentTime(0);
@@ -42,7 +44,7 @@ function MusicPlayer({ currentQueue, currentIndex, onFileUpload }) {
 
     return (
         <main className="player">
-            <input type="file" accept="audio/*" onChange={onFileUpload} />
+            <input type="file" multiple accept="audio/*" onChange={onFileUpload} />
 
             {currentSong ? (
                 <>

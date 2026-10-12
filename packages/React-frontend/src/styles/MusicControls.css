@@ -30,3 +30,11 @@
 .seek-bar {
     flex: 1;
 }
+
+.shuffle-button {
+    margin-right: 10px;
+}
+
+.repeat-button {
+    margin-left: 10px;
+}

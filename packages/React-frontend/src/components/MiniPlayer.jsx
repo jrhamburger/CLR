@@ -4,12 +4,24 @@ import MusicControls from "./MusicControls";
 
 
 
-function MiniPlayer({ currentQueue, currentIndex, setCurrentIndex }) {
+function MiniPlayer({ 
+    currentQueue, 
+    playOrder, 
+    playPosition, 
+    setPlayOrder, 
+    setPlayPosition,
+    isShuffle,
+    isRepeating,
+    setIsShuffle,
+    setIsRepeating,
+}) {
     const audioRef = useRef(null);
     const [isPlaying, setIsPlaying] = useState(false);
     const [currentTime, setCurrentTime] = useState(0);
     const [duration, setDuration] = useState(0);
-    let currentSong = currentQueue[currentIndex];
+    
+    const currentTrackIndex = playOrder[playPosition];
+    const currentSong = currentQueue[currentTrackIndex];
 
     useEffect(() => {
         if (!currentSong || !audioRef.current) return;
@@ -52,6 +64,8 @@ function MiniPlayer({ currentQueue, currentIndex, setCurrentIndex }) {
     }
 
     function onToggleSeekLeft() {
+        if (!audioRef.current || !currentSong) return;
+
         const newTime = Math.max(
             audioRef.current.currentTime - 5,
             0
@@ -61,12 +75,78 @@ function MiniPlayer({ currentQueue, currentIndex, setCurrentIndex }) {
         setCurrentTime(newTime);
     }
 
-    function onEnded() {
-        if (currentIndex < currentQueue.length - 1) {
-            setCurrentIndex((index) => index + 1);
-        } else {
-            setIsPlaying(false);
+    function onToggleNext() {
+        if (!audioRef.current || !currentSong) return;
+
+        if (playPosition < playOrder.length - 1) {
+            setPlayPosition((position) => position + 1);
+        } else if (isRepeating) {
+            setPlayPosition(0);
         }
+    }
+
+    function onTogglePrevious() {
+        if (!audioRef.current || !currentSong) return;
+
+        if ((audioRef.current.currentTime < 1) && playPosition > 0) {
+            setPlayPosition((position) => position - 1);
+        } else {
+            audioRef.current.currentTime = 0;
+            setCurrentTime(0);
+        }
+    }
+
+    function onToggleShuffle() {
+        if (!currentSong) return;
+
+        if (!isShuffle) {
+            const shuffledOrder = createShuffleOrder(currentQueue.length);
+
+            const currentPositionInOrder =
+            shuffledOrder.indexOf(currentTrackIndex);
+
+            [shuffledOrder[0], shuffledOrder[currentPositionInOrder]] = [
+            shuffledOrder[currentPositionInOrder],
+            shuffledOrder[0],
+            ];
+
+            setPlayOrder(shuffledOrder);
+            setPlayPosition(0);
+            setIsShuffle(true);
+        } else {
+            const normalOrder = currentQueue.map((_, index) => index);
+
+            setPlayOrder(normalOrder);
+            setPlayPosition(currentTrackIndex);
+            setIsShuffle(false);
+        }
+    }
+
+    function onToggleRepeat() {
+        if (isRepeating) {
+            setIsRepeating(false);
+        } else {
+            setIsRepeating(true);
+        }
+    }
+
+    function createShuffleOrder(queueLength) {
+        const order = Array.from({ length: queueLength }, (_, index) => index);
+
+        for (let index = order.length - 1; index > 0; --index) {
+            const randomIndex = Math.floor(Math.random() * (index + 1));
+
+            [order[index], order[randomIndex]] = [
+                order[randomIndex],
+                order[index],
+            ];
+        }
+
+        return order;
+    }
+
+    function onEnded() {
+        onToggleNext();
     }
 
 
@@ -95,6 +175,10 @@ function MiniPlayer({ currentQueue, currentIndex, setCurrentIndex }) {
                 onSeek={seekSong}
                 onToggleSeekRight={onToggleSeekRight}
                 onToggleSeekLeft={onToggleSeekLeft}
+                onToggleNext={onToggleNext}
+                onTogglePrevious={onTogglePrevious}
+                onToggleShuffle={onToggleShuffle}
+                onToggleRepeat={onToggleRepeat}
             />
 
         </main>

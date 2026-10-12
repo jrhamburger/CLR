@@ -8,9 +8,12 @@ import MiniPlayer from './components/MiniPlayer';
 
 function App() {
   const [currentScreen, setCurrentScreen] = useState("sign-up");
-  const [selectedSong, setSelectedSong] = useState(null);
   const [currentQueue, setCurrentQueue] = useState([]);
-  const [currentIndex, setCurrentIndex] = useState(-1);
+  const [playOrder, setPlayOrder] = useState([]);
+  const [playPosition, setPlayPosition] = useState(0);
+
+  const [isShuffle, setIsShuffle] = useState(false);
+  const [isRepeating, setIsRepeating] = useState(false);
 
   useEffect(() => {
     async function testConnection() {
@@ -33,22 +36,25 @@ function App() {
 
   // TODO: Fix this function
   function handleFileUpload(event) {
-      const file = event.target.files[0];
-      if (!file) return;
+      const files = Array.from(event.target.files ?? []);
 
-      const song = {
+      if (files.length === 0) return;
+      const uploadedSongs = files.map((file) => ({
         title: file.name,
         audioUrl: URL.createObjectURL(file),
-      }
+      }))
 
-      function addToQueue(song) {
-        setCurrentQueue((queue) => [...queue, song]);
-      }
+      startQueue(uploadedSongs);
 
-      addToQueue(song);
-      if (currentIndex < 0) {
-        setCurrentIndex(currentIndex + 1);
-      }
+      event.target.value = "";
+  }
+
+  function startQueue(tracks, startingIndex = 0) {
+    const normalOrder = tracks.map((_, index) => index);
+
+    setCurrentQueue(tracks);
+    setPlayOrder(normalOrder);
+    setPlayPosition(startingIndex);
   }
 
   return (
@@ -58,13 +64,24 @@ function App() {
         <button onClick={showPlayer}>Player</button>
       </nav>
 
-      {currentQueue && <MiniPlayer currentQueue={currentQueue} currentIndex={currentIndex} setCurrentIndex={setCurrentIndex}/>}
+      {currentQueue && <MiniPlayer 
+        currentQueue={currentQueue}
+        playOrder={playOrder} 
+        playPosition={playPosition}
+        setPlayPosition={setPlayPosition}
+        setPlayOrder={setPlayOrder}
+        isShuffle={isShuffle}
+        isRepeating={isRepeating}
+        setIsShuffle={setIsShuffle}
+        setIsRepeating={setIsRepeating}
+      />}
 
       {currentScreen == "sign-up" && <SignUp />}
       {currentScreen == "player" && 
         <MusicPlayer 
-          currentQueue={currentQueue} 
-          currentIndex={currentIndex}
+          currentQueue={currentQueue}
+          playOrder={playOrder}
+          playPosition={playPosition} 
           onFileUpload={handleFileUpload}
         />
       }

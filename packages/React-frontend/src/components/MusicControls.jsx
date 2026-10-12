@@ -8,6 +8,10 @@ function MusicControls({
     onSeek,
     onToggleSeekRight,
     onToggleSeekLeft,
+    onToggleNext,
+    onTogglePrevious,
+    onToggleRepeat,
+    onToggleShuffle,
 }) {
 
     function formatTime(time) {
@@ -36,13 +40,15 @@ function MusicControls({
             
 
             <div className="music-controls">
-                <button>Previous</button>
+                <button onClick={onToggleShuffle} className="shuffle-button">Shuffle</button>
+                <button onClick={onTogglePrevious}>Previous</button>
                 <button onClick={onToggleSeekLeft}>Seek Left</button>
                 <button onClick={onTogglePlay}>
                     {isPlaying ? "Pause" : "Play"}
                 </button>
                 <button onClick={onToggleSeekRight}>Seek Right</button>
-                <button>Next</button>
+                <button onClick={onToggleNext}>Next</button>
+                <button onClick={onToggleRepeat} className="repeat-button">Repeat</button>
             </div>
         </div>
         
