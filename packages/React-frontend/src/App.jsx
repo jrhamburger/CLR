@@ -6,6 +6,7 @@ import SignUp from "./components/SignUp";
 import MusicPlayer from "./components/MusicPlayer";
 import MiniPlayer from './components/MiniPlayer';
 import SignIn from "./components/SignIn";
+import Home from "./components/Home";
 
 function App() {
   const [currentScreen, setCurrentScreen] = useState("sign-up");
@@ -16,16 +17,15 @@ function App() {
   const [isShuffle, setIsShuffle] = useState(false);
   const [isRepeating, setIsRepeating] = useState(false);
 
+  const [session, setSession] = useState(null);
+
   useEffect(() => {
-    async function testConnection() {
-      const { data, error } = await supabase.auth.getSession();
-
-      console.log("Connected:", data);
-      console.log("Error:", error);
-    }
-
-    testConnection();
-  }, []);
+  supabase.auth.getSession().then(({ data }) => setSession(data.session));
+  const { data: listener } = supabase.auth.onAuthStateChange(
+    (_event, session) => setSession(session)
+    );
+    return () => listener.subscription.unsubscribe();
+  }, []);   
 
   function showSignUp() {
     setCurrentScreen("sign-up");
@@ -82,8 +82,9 @@ function App() {
         setIsRepeating={setIsRepeating}
       />}
 
-      {currentScreen === "sign-up" && <SignUp />}
-      {currentScreen === "sign-in" && <SignIn />}
+      {!session && currentScreen === "sign-up" && <SignUp />}
+      {!session && currentScreen === "sign-in" && <SignIn />}
+      {session && <Home session={session} />}
       {currentScreen === "player" && 
         <MusicPlayer 
           currentQueue={currentQueue}
