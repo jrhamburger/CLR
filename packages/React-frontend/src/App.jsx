@@ -7,6 +7,7 @@ import MusicPlayer from "./components/MusicPlayer";
 import MiniPlayer from './components/MiniPlayer';
 import SignIn from "./components/SignIn";
 import Home from "./components/Home";
+import Playlists from "./components/Playlists";
 
 function App() {
   const [currentScreen, setCurrentScreen] = useState("sign-up");
@@ -22,7 +23,10 @@ function App() {
   useEffect(() => {
   supabase.auth.getSession().then(({ data }) => setSession(data.session));
   const { data: listener } = supabase.auth.onAuthStateChange(
-    (_event, session) => setSession(session)
+    (_event, session) => {
+      setSession(session);
+      setCurrentScreen(session ? "home" : "sign-in");
+    }
     );
     return () => listener.subscription.unsubscribe();
   }, []);   
@@ -65,9 +69,11 @@ function App() {
   return (
     <>
       <nav>
-        <button onClick={showSignUp}>Sign Up</button>
-        <button onClick={showPlayer}>Player</button>
-        <button onClick={showSignIn}>Sign In</button>
+        {!session && <button onClick={() => setCurrentScreen("sign-up")}>Sign Up</button>}
+        {!session && <button onClick={() => setCurrentScreen("sign-in")}>Sign In</button>}
+        {session && <button onClick={() => setCurrentScreen("home")}>Home</button>}
+        {session && <button onClick={() => setCurrentScreen("playlists")}>Playlists</button>}
+        {session && <button onClick={() => setCurrentScreen("player")}>Player</button>}
       </nav>
 
       {currentQueue && <MiniPlayer 
@@ -84,8 +90,11 @@ function App() {
 
       {!session && currentScreen === "sign-up" && <SignUp />}
       {!session && currentScreen === "sign-in" && <SignIn />}
-      {session && <Home session={session} />}
-      {currentScreen === "player" && 
+
+      {session && currentScreen === "home" && <Home session={session} />}
+      {session && currentScreen === "playlists" && <Playlists session={session} />}
+
+      {session && currentScreen === "player" && 
         <MusicPlayer 
           currentQueue={currentQueue}
           playOrder={playOrder}
