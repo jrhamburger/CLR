@@ -81,7 +81,7 @@ function App() {
         {session && <button onClick={() => setCurrentScreen("player")}>Player</button>}
       </nav>
 
-      {currentQueue && <MiniPlayer 
+      {session && currentQueue && <MiniPlayer 
         currentQueue={currentQueue}
         playOrder={playOrder} 
         playPosition={playPosition}
