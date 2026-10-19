@@ -35,6 +35,10 @@ function App() {
     setCurrentScreen("player");
   }
 
+  function showSignIn(){
+    setCurrentScreen("sign-in");
+  }
+
   // TODO: Fix this function
   function handleFileUpload(event) {
       const files = Array.from(event.target.files ?? []);
