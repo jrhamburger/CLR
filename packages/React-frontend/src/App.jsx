@@ -15,6 +15,8 @@ function App() {
   const [isShuffle, setIsShuffle] = useState(false);
   const [isRepeating, setIsRepeating] = useState(false);
 
+  const [savedTracks, setSavedTracks] = useState([]);
+
   useEffect(() => {
     async function testConnection() {
       const { data, error } = await supabase.auth.getSession();
@@ -45,17 +47,106 @@ function App() {
         error: userError,
       } = await supabase.auth.getUser();
 
-      if (userError) throw userError;
+      if (userError) {
+        console.error(userError);
+        return;
+      }
       if (!user) throw new Error("You must be logged in to upload.");
 
-      const uploadedSongs = files.map((file) => ({
-        title: file.name,
-        audioUrl: URL.createObjectURL(file),
-      }))
+      const uploadedTracks = [];
+      const failedFiles = [];
 
-      startQueue(uploadedSongs);
+      for (const file of files) {
+        if (!file.type.startsWith("audio/")) {
+          failedFiles.push(`${file.name} is not an audio file.`);
+          continue;
+        }
 
-      event.target.value = "";
+        const safeFileName = file.name.replace(/[^a-zA-Z0-9._-]/g, "_");
+
+        const audioPath = `${user.id}/${crypto.randomUUID()}-${safeFileName}`;
+
+        // 1. Upload the actual audio file to storage
+        const { error: uploadError } = await supabase.storage
+          .from("audio-files")
+          .upload(audioPath, file, {
+            contentType: file.type,
+            upsert: false,
+          });
+
+        if (uploadError) {
+          console.error(uploadError);
+          failedFiles.push(`Could not upload ${file.name}.`);
+          continue;
+        }
+
+        // 2. Create its tracks-table row.
+        const title = file.name.replace(/\.[^/.]+$/, "");
+
+        const { data: newTrack, error: trackError } = await supabase
+          .from("tracks")
+          .insert({
+            title,
+            owner_id: user.id,
+            audio_path: audioPath,
+          })
+          .select()
+          .single();
+
+        if (trackError) {
+          console.error(trackError);
+          failedFiles.push(`Could not save ${file.name}'s track information.`);
+
+          await supabase.storage.from("audio-files").remove([audioPath]);
+          continue;
+        }
+
+        // 3. Save that track to this user's library.
+        const { error: savedTrackError } = await supabase
+          .from("user_tracks")
+          .insert({
+            user_id: user.id,
+            track_id: newTrack.id,
+          });
+
+        if (savedTrackError) {
+          console.error(savedTrackError);
+          failedFiles.push(`Could not add ${file.name} to the library.`);
+          continue;
+        }
+
+        uploadedTracks.push(newTrack);
+
+        // Immediately update React state with all successful uploads.
+        setSavedTracks((currentTracks) => [
+          ...uploadedTracks,
+          ...currentTracks,
+        ]);
+
+        if (failedFiles.length > 0) {
+          console.log(failedFiles);
+          alert(`${uploadedTracks.length} uploaded; ${failedFiles.length} failed.`);
+        } else {
+          alert(`${uploadedTracks.length} song(s) uploaded successfully.`);
+        }
+
+        // Allows the user to select the same file(s) again later if needed.
+        event.target.value = "";
+      }
+
+      
+
+      
+
+
+      // const uploadedSongs = files.map((file) => ({
+      //   title: file.name,
+      //   audioUrl: URL.createObjectURL(file),
+      // }))
+
+      // startQueue(uploadedSongs);
+
+      // event.target.value = "";
   }
 
   function startQueue(tracks, startingIndex = 0) {
@@ -92,6 +183,7 @@ function App() {
           playOrder={playOrder}
           playPosition={playPosition} 
           onFileUpload={handleFileUpload}
+          savedTracks={savedTracks}
         />
       }
     </>

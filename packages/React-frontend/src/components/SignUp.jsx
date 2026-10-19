@@ -2,50 +2,93 @@ import { useState } from "react";
 import { supabase } from "../lib/supabase";
 
 function SignUp() {
-    const [email, setEmail] = useState("");
-    const [password, setPassword] = useState("");
-    const [message, setMessage] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [message, setMessage] = useState("");
 
-    async function handleSubmit(event) {
-        event.preventDefault();
+  async function handleSubmit(event) {
+    event.preventDefault();
 
-        const { error } = await supabase.auth.signUp({
-            email,
-            password,
-        });
+    const { error } = await supabase.auth.signUp({
+      email,
+      password
+    });
 
-        if (error) {
-            setMessage(error.message);
-        } else {
-            setMessage("Check your email to confirm your account.");
-        }
+    if (error) {
+      setMessage(error.message);
+    } else {
+      setMessage("Check your email to confirm your account.");
+    }
+  }
+
+  async function handleLogin(email, password) {
+    const { data, error } =
+      await supabase.auth.signInWithPassword({
+        email,
+        password
+      });
+
+    if (error) {
+      console.error(error);
+      return;
     }
 
-    return (
-        <form onSubmit={handleSubmit}>
-            <h2>Create an account</h2>
+    console.log(data.user);
+  }
 
-            <input
-                type="email"
-                placeholder="Email"
-                value={email}
-                onChange={(event) => setEmail(event.target.value)}
-                required
-            />
+  return (
+    <>
+      <form onSubmit={handleSubmit}>
+        <h2>Create an account</h2>
 
-            <input 
-                type="password"
-                placeholder="Password"
-                value={password}
-                onChange={(event) => setPassword(event.target.value)}
-                required
-            />
+        <input
+          type="email"
+          placeholder="Email"
+          value={email}
+          onChange={(event) => setEmail(event.target.value)}
+          required
+        />
 
-            <button type="submit">Sign up</button>
+        <input
+          type="password"
+          placeholder="Password"
+          value={password}
+          onChange={(event) => setPassword(event.target.value)}
+          required
+        />
 
-            {message && <p>{message}</p>}
-        </form>
-    );
+        <button type="submit">Sign up</button>
+
+        {message && <p>{message}</p>}
+      </form>
+
+      <h2>-- OR --</h2>
+
+      <form onSubmit={handleLogin}>
+        <h2>Sign In</h2>
+
+        <input
+          type="email"
+          placeholder="Email"
+          value={email}
+          onChange={(event) => setEmail(event.target.value)}
+          required
+        />
+
+        <input
+          type="password"
+          placeholder="Password"
+          value={password}
+          onChange={(event) => setPassword(event.target.value)}
+          required
+        />
+
+        <button type="submit">Login</button>
+
+        {message && <p>{message}</p>}
+      </form>
+    </>
+  );
 }
 
 export default SignUp;
