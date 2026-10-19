@@ -7,13 +7,25 @@ function SignUp() {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [message, setMessage] = useState("");
+    const [username, setUsername] = useState("");
 
     async function handleSubmit(event) {
         event.preventDefault();
+        
+        const { data: existing } = await supabase
+        .from("users")
+        .select("user_name")
+        .eq("user_name", username);
+
+        if (existing.length > 0) {
+        setMessage("That username is taken.");
+        return;
+        }
 
         const { error } = await supabase.auth.signUp({
             email,
             password,
+            options: { data : {user_name: username } },
         });
 
         if (error) {
@@ -26,6 +38,14 @@ function SignUp() {
     return (
         <form className="signup-form" onSubmit={handleSubmit}>
             <h2>Create an account</h2>
+            
+            <input
+                type="text"
+                placeholder="Username"
+                value={username}
+                onChange={(event) => setUsername(event.target.value)}
+                required
+            />
 
             <input
                 type="email"

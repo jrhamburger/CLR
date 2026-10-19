@@ -9,7 +9,7 @@ function SignIn () {
     async function handleSubmit(event) {
         event.preventDefault();
 
-        const { error } = await supabase.auth.signIn(
+        const { error } = await supabase.auth.signInWithPassword(
             {email, password,}
         )
 
