@@ -5,6 +5,7 @@ import { supabase } from "./lib/supabase";
 import SignUp from "./components/SignUp";
 import MusicPlayer from "./components/MusicPlayer";
 import MiniPlayer from './components/MiniPlayer';
+import SignIn from './components/SignIn';
 
 function App() {
   const [currentScreen, setCurrentScreen] = useState("sign-up");
@@ -16,6 +17,7 @@ function App() {
   const [isRepeating, setIsRepeating] = useState(false);
 
   const [savedTracks, setSavedTracks] = useState([]);
+  const [signedIn, setSignedIn] = useState(false);
 
   useEffect(() => {
     async function testConnection() {
@@ -34,6 +36,10 @@ function App() {
 
   function showPlayer() {
     setCurrentScreen("player");
+  }
+
+  function showSignIn() {
+    setCurrentScreen("sign-in");
   }
 
   // TODO: Fix this function
@@ -162,6 +168,7 @@ function App() {
       <nav>
         <button onClick={showSignUp}>Sign Up</button>
         <button onClick={showPlayer}>Player</button>
+        <button onClick={showSignIn}>Sign In</button>
       </nav>
 
       {currentQueue && <MiniPlayer 
@@ -184,8 +191,10 @@ function App() {
           playPosition={playPosition} 
           onFileUpload={handleFileUpload}
           savedTracks={savedTracks}
+          signedIn={signedIn}
         />
       }
+      {currentScreen == "sign-in" && <SignIn setSignedIn={setSignedIn} />}
     </>
   );
 }

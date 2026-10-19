@@ -21,21 +21,6 @@ function SignUp() {
     }
   }
 
-  async function handleLogin(email, password) {
-    const { data, error } =
-      await supabase.auth.signInWithPassword({
-        email,
-        password
-      });
-
-    if (error) {
-      console.error(error);
-      return;
-    }
-
-    console.log(data.user);
-  }
-
   return (
     <>
       <form onSubmit={handleSubmit}>
@@ -58,32 +43,6 @@ function SignUp() {
         />
 
         <button type="submit">Sign up</button>
-
-        {message && <p>{message}</p>}
-      </form>
-
-      <h2>-- OR --</h2>
-
-      <form onSubmit={handleLogin}>
-        <h2>Sign In</h2>
-
-        <input
-          type="email"
-          placeholder="Email"
-          value={email}
-          onChange={(event) => setEmail(event.target.value)}
-          required
-        />
-
-        <input
-          type="password"
-          placeholder="Password"
-          value={password}
-          onChange={(event) => setPassword(event.target.value)}
-          required
-        />
-
-        <button type="submit">Login</button>
 
         {message && <p>{message}</p>}
       </form>

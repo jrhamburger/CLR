@@ -3,7 +3,7 @@ import { useRef, useState, useEffect } from "react";
 import MusicControls from "./MusicControls";
 
 
-function MusicPlayer({ currentQueue, playOrder, playPosition, onFileUpload, savedTracks }) {
+function MusicPlayer({ currentQueue, playOrder, playPosition, onFileUpload, savedTracks, signedIn }) {
     const audioRef = useRef(null);
     const [isPlaying, setIsPlaying] = useState(false);
     const [currentTime, setCurrentTime] = useState(0);
@@ -50,7 +50,7 @@ function MusicPlayer({ currentQueue, playOrder, playPosition, onFileUpload, save
         <main className="player">
             <input type="file" multiple accept="audio/*" onChange={onFileUpload} />
 
-            {currentSong ? (
+            {currentSong && signedIn ? (
                 <>
                     <h1>{currentSong.title}</h1>
 
@@ -68,6 +68,8 @@ function MusicPlayer({ currentQueue, playOrder, playPosition, onFileUpload, save
                     </div>
 
                 </>
+            ) : !signedIn ? (
+                <p>Error: you're not signed in. Sign in to upload.</p>
             ) : (
                 <p>No song selected yet.</p>
             )}
