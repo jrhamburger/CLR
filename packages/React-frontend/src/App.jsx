@@ -35,10 +35,19 @@ function App() {
   }
 
   // TODO: Fix this function
-  function handleFileUpload(event) {
+  async function handleFileUpload(event) {
       const files = Array.from(event.target.files ?? []);
 
       if (files.length === 0) return;
+
+      const { 
+        data: { user }, 
+        error: userError,
+      } = await supabase.auth.getUser();
+
+      if (userError) throw userError;
+      if (!user) throw new Error("You must be logged in to upload.");
+
       const uploadedSongs = files.map((file) => ({
         title: file.name,
         audioUrl: URL.createObjectURL(file),
