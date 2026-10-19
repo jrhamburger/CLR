@@ -40,7 +40,7 @@ return (
                 required
             />
 
-        <button type="submit">Sign up</button>
+        <button type="submit">Sign In</button>
 
         {message && <p>{message}</p>}
     </form>
