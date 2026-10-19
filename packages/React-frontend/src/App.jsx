@@ -43,6 +43,10 @@ function App() {
     setCurrentScreen("sign-in");
   }
 
+  async function handleSignOut() {
+    await supabase.auth.signOut();
+  }
+
   // TODO: Fix this function
   function handleFileUpload(event) {
       const files = Array.from(event.target.files ?? []);
@@ -69,6 +73,7 @@ function App() {
   return (
     <>
       <nav>
+        {session && <button onClick={handleSignOut}>Sign out</button>}
         {!session && <button onClick={() => setCurrentScreen("sign-up")}>Sign Up</button>}
         {!session && <button onClick={() => setCurrentScreen("sign-in")}>Sign In</button>}
         {session && <button onClick={() => setCurrentScreen("home")}>Home</button>}
