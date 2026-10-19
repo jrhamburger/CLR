@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { supabase } from "../lib/supabase";
+import "../styles/SignUp.css";
 
 function SignUp() {
   const [email, setEmail] = useState("");
@@ -23,7 +24,7 @@ function SignUp() {
 
   return (
     <>
-      <form onSubmit={handleSubmit}>
+      <form className="signup-form" onSubmit={handleSubmit}>
         <h2>Create an account</h2>
 
         <input
