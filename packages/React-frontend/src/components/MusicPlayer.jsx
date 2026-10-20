@@ -2,88 +2,98 @@ import { motion } from "framer-motion";
 import { useRef, useState, useEffect } from "react";
 import MusicControls from "./MusicControls";
 
+function MusicPlayer({
+  currentQueue,
+  playOrder,
+  playPosition,
+  onFileUpload,
+  savedTracks,
+  signedIn
+}) {
+  const audioRef = useRef(null);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [currentTime, setCurrentTime] = useState(0);
+  const [duration, setDuration] = useState(0);
 
-function MusicPlayer({ currentQueue, playOrder, playPosition, onFileUpload, savedTracks, signedIn }) {
-    const audioRef = useRef(null);
-    const [isPlaying, setIsPlaying] = useState(false);
-    const [currentTime, setCurrentTime] = useState(0);
-    const [duration, setDuration] = useState(0);
+  const currentTrackIndex = playOrder[playPosition];
+  const currentSong = currentQueue[currentTrackIndex];
 
-    const currentTrackIndex = playOrder[playPosition];
-    const currentSong = currentQueue[currentTrackIndex];
+  // useEffect(() => {
+  //     setCurrentTime(0);
+  //     setIsPlaying(false);
+  // }, [selectedSong]);
 
-    // useEffect(() => {
-    //     setCurrentTime(0);
-    //     setIsPlaying(false);
-    // }, [selectedSong]);
+  // function togglePlay() {
+  //     if (!audioRef.current || !selectedSong) return;
 
-    // function togglePlay() {
-    //     if (!audioRef.current || !selectedSong) return;
+  //     if (audioRef.current.paused) {
+  //         audioRef.current.play();
+  //     } else {
+  //         audioRef.current.pause();
+  //     }
+  // }
 
-    //     if (audioRef.current.paused) {
-    //         audioRef.current.play();
-    //     } else {
-    //         audioRef.current.pause();
-    //     }
-    // }
+  // function handlePlay() {
+  //     if (selectedSong) {
+  //         console.log(`Playing ${selectedSong.title}`);
+  //     }
+  // }
 
-    // function handlePlay() {
-    //     if (selectedSong) {
-    //         console.log(`Playing ${selectedSong.title}`);
-    //     }
-    // }
+  // function seekSong(event) {
+  //     const newTime = Number(event.target.value);
 
-    // function seekSong(event) {
-    //     const newTime = Number(event.target.value);
+  //     if (!audioRef.current) return;
 
-    //     if (!audioRef.current) return;
+  //     audioRef.current.currentTime = newTime;
+  //     setCurrentTime(newTime);
+  // }
 
-    //     audioRef.current.currentTime = newTime;
-    //     setCurrentTime(newTime);
-    // }
+  function loadSavedTracks() {}
 
-    function loadSavedTracks() {
+  return (
+    <main className="player">
+      {currentSong && signedIn ? (
+        <>
+          <h1>{currentSong.title}</h1>
 
-    }
+          <audio
+            ref={audioRef}
+            src={currentSong.audioUrl}
+            onPlay={() => setIsPlaying(true)}
+            onPause={() => setIsPlaying(false)}
+            onTimeUpdate={() =>
+              setCurrentTime(audioRef.current.currentTime)
+            }
+            onLoadedMetadata={() =>
+              setDuration(audioRef.current.duration)
+            }
+          />
 
-    return (
-        <main className="player">
-            <input type="file" multiple accept="audio/*" onChange={onFileUpload} />
+          <div>{savedTracks}</div>
+        </>
+      ) : !signedIn ? (
+        <p>Error: you're not signed in. Sign in to upload.</p>
+      ) : (
+        <>
+          <input
+            type="file"
+            multiple
+            accept="audio/*"
+            onChange={onFileUpload}
+          />
+          <p>No song selected yet.</p>
+        </>
+      )}
 
-            {currentSong && signedIn ? (
-                <>
-                    <h1>{currentSong.title}</h1>
-
-                    <audio
-                        ref={audioRef}
-                        src={currentSong.audioUrl}
-                        onPlay={() => setIsPlaying(true)}
-                        onPause={() => setIsPlaying(false)}
-                        onTimeUpdate={() => setCurrentTime(audioRef.current.currentTime)}
-                        onLoadedMetadata={() => setDuration(audioRef.current.duration)}
-                    />
-
-                    <div>
-                        {savedTracks}
-                    </div>
-
-                </>
-            ) : !signedIn ? (
-                <p>Error: you're not signed in. Sign in to upload.</p>
-            ) : (
-                <p>No song selected yet.</p>
-            )}
-
-            {/* <MusicControls
+      {/* <MusicControls
                 isPlaying={isPlaying}
                 currentTime={currentTime}
                 duration={duration}
                 onTogglePlay={togglePlay}
                 onSeek={seekSong}
             /> */}
-
-        </main>
-    );
+    </main>
+  );
 }
 
 export default MusicPlayer;
