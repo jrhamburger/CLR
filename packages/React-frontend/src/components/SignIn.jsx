@@ -5,19 +5,33 @@ function SignIn () {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [message, setMessage] = useState("");
+    const [identifier, setIdentifier] = useState("");
 
     async function handleSubmit(event) {
         event.preventDefault();
 
+        let loginEmail = identifier;
+
+        if (!identifier.includes("@")){
+           const { data, error: lookupError } = await supabase.rpc("email_for_username", {
+            lookup_name: identifier
+        });
+
+            if (lookupError || !data) {
+                setMessage("Invalid Login Credentials")
+                return;
+            }
+
+            loginEmail= data;
+        }
+
         const { error } = await supabase.auth.signInWithPassword(
-            {email, password,}
+            {email: loginEmail, password,}
         )
 
         if (error) {
             setMessage(error.message);
-        } else {
-            setMessage("Signed in."); //Delete once App.jsx connected after sign in
-        }
+        } 
     }
 
 return (
@@ -25,10 +39,10 @@ return (
         <h2>Sign in</h2>
 
         <input
-            type = "email"
-            placeholder = "Email"
-            value = {email}
-            onChange={(event) => setEmail(event.target.value)} 
+            type = "tezt"
+            placeholder = "Email/Username"
+            value = {identifier}
+            onChange={(event) => setIdentifier(event.target.value)} 
             required
         />
 
