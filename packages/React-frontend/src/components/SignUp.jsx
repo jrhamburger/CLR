@@ -5,7 +5,6 @@ import "../styles/SignUp.css";
 import "../styles/SignUp.css"
 
 function SignUp() {
-<<<<<<< HEAD
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [message, setMessage] = useState("");
@@ -29,19 +28,6 @@ function SignUp() {
             password,
             options: { data : {user_name: username } },
         });
-=======
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [message, setMessage] = useState("");
-
-  async function handleSubmit(event) {
-    event.preventDefault();
-
-    const { error } = await supabase.auth.signUp({
-      email,
-      password
-    });
->>>>>>> file-uploading
 
     if (error) {
       setMessage(error.message);
@@ -50,24 +36,18 @@ function SignUp() {
     }
   }
 
-<<<<<<< HEAD
     return (
+      <>
         <form className="signup-form" onSubmit={handleSubmit}>
             <h2>Create an account</h2>
             
-            <input
-                type="text"
-                placeholder="Username"
-                value={username}
-                onChange={(event) => setUsername(event.target.value)}
-                required
-            />
-=======
-  return (
-    <>
-      <form className="signup-form" onSubmit={handleSubmit}>
-        <h2>Create an account</h2>
->>>>>>> file-uploading
+        <input
+            type="text"
+            placeholder="Username"
+            value={username}
+            onChange={(event) => setUsername(event.target.value)}
+            required
+        />
 
         <input
           type="email"

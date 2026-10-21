@@ -1,96 +1,41 @@
-<<<<<<< HEAD
-import {useState} from "react";
-import {supabase} from "../lib/supabase";
-
-function SignIn () {
-    const [email, setEmail] = useState("");
-    const [password, setPassword] = useState("");
-    const [message, setMessage] = useState("");
-    const [identifier, setIdentifier] = useState("");
-
-    async function handleSubmit(event) {
-        event.preventDefault();
-
-        let loginEmail = identifier;
-
-        if (!identifier.includes("@")){
-           const { data, error: lookupError } = await supabase.rpc("email_for_username", {
-            lookup_name: identifier
-        });
-
-            if (lookupError || !data) {
-                setMessage("Invalid Login Credentials")
-                return;
-            }
-
-            loginEmail= data;
-        }
-
-        const { error } = await supabase.auth.signInWithPassword(
-            {email: loginEmail, password,}
-        )
-
-        if (error) {
-            setMessage(error.message);
-        } 
-    }
-
-return (
-    <form className="signup-form" onSubmit={handleSubmit}>
-        <h2>Sign in</h2>
-
-        <input
-            type = "tezt"
-            placeholder = "Email/Username"
-            value = {identifier}
-            onChange={(event) => setIdentifier(event.target.value)} 
-            required
-        />
-
-        <input 
-                type="password"
-                placeholder="Password"
-                value={password}
-                onChange={(event) => setPassword(event.target.value)}
-                required
-            />
-
-        <button type="submit">Sign In</button>
-
-        {message && <p>{message}</p>}
-    </form>
-) 
-}
-export default SignIn;
-=======
 import { useState } from "react";
 import { supabase } from "../lib/supabase";
-import "../styles/SignUp.css";
 
-function SignIn({ setSignedIn }) {
+function SignIn() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [message, setMessage] = useState("");
+  const [identifier, setIdentifier] = useState("");
 
-  async function handleLogin(event) {
+  async function handleSubmit(event) {
     event.preventDefault();
 
-    const { data, error } =
-      await supabase.auth.signInWithPassword({
-        email,
-        password
-      });
+    let loginEmail = identifier;
 
-    if (error) {
-      console.error(error);
-      setMessage(error.message);
-      return;
-    } else {
-      setMessage("Success");
+    if (!identifier.includes("@")) {
+      const { data, error: lookupError } = await supabase.rpc(
+        "email_for_username",
+        {
+          lookup_name: identifier
+        }
+      );
+
+      if (lookupError || !data) {
+        setMessage("Invalid Login Credentials");
+        return;
+      }
+
+      loginEmail = data;
     }
 
-    console.log(data.user);
-    setSignedIn(true);
+    const { error } = await supabase.auth.signInWithPassword({
+      email: loginEmail,
+      password
+    });
+
+    if (error) {
+      setMessage(error.message);
+    }
   }
 
   return (
@@ -105,7 +50,7 @@ function SignIn({ setSignedIn }) {
             </linearGradient>
           </defs>
 
-          <path 
+          <path
             className="background-path"
             d="M -100 300 C 150 80, 260 520, 500, 300 S 800 80, 1100 300"
           />
@@ -113,14 +58,16 @@ function SignIn({ setSignedIn }) {
       </div>
 
       <section className="sign-in-card">
-        <form className="signup-form" onSubmit={handleLogin}>
+        <form className="signup-form" onSubmit={handleSubmit}>
           <h2>Sign in</h2>
 
           <input
-            type="email"
-            placeholder="Email"
-            value={email}
-            onChange={(event) => setEmail(event.target.value)}
+            type="text"
+            placeholder="Email/Username"
+            value={identifier}
+            onChange={(event) =>
+              setIdentifier(event.target.value)
+            }
             required
           />
 
@@ -143,4 +90,3 @@ function SignIn({ setSignedIn }) {
   );
 }
 export default SignIn;
->>>>>>> file-uploading

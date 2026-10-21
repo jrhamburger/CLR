@@ -5,13 +5,9 @@ import { supabase } from "./lib/supabase";
 import SignUp from "./components/SignUp";
 import MusicPlayer from "./components/MusicPlayer";
 import MiniPlayer from './components/MiniPlayer';
-<<<<<<< HEAD
 import SignIn from "./components/SignIn";
 import Home from "./components/Home";
 import Playlists from "./components/Playlists";
-=======
-import SignIn from './components/SignIn';
->>>>>>> file-uploading
 
 function App() {
   const [currentScreen, setCurrentScreen] = useState("sign-up");
@@ -22,12 +18,9 @@ function App() {
   const [isShuffle, setIsShuffle] = useState(false);
   const [isRepeating, setIsRepeating] = useState(false);
 
-<<<<<<< HEAD
   const [session, setSession] = useState(null);
-=======
   const [savedTracks, setSavedTracks] = useState([]);
   const [signedIn, setSignedIn] = useState(false);
->>>>>>> file-uploading
 
   useEffect(() => {
   supabase.auth.getSession().then(({ data }) => setSession(data.session));
@@ -48,7 +41,6 @@ function App() {
     setCurrentScreen("player");
   }
 
-<<<<<<< HEAD
   function showSignIn(){
     setCurrentScreen("sign-in");
   }
@@ -57,12 +49,6 @@ function App() {
     await supabase.auth.signOut();
   }
 
-=======
-  function showSignIn() {
-    setCurrentScreen("sign-in");
-  }
-
->>>>>>> file-uploading
   // TODO: Fix this function
   async function handleFileUpload(event) {
       const files = Array.from(event.target.files ?? []);
@@ -187,18 +173,12 @@ function App() {
   return (
     <>
       <nav>
-<<<<<<< HEAD
         {session && <button onClick={handleSignOut}>Sign out</button>}
         {!session && <button onClick={() => setCurrentScreen("sign-up")}>Sign Up</button>}
         {!session && <button onClick={() => setCurrentScreen("sign-in")}>Sign In</button>}
         {session && <button onClick={() => setCurrentScreen("home")}>Home</button>}
         {session && <button onClick={() => setCurrentScreen("playlists")}>Playlists</button>}
         {session && <button onClick={() => setCurrentScreen("player")}>Player</button>}
-=======
-        <button onClick={showSignUp}>Sign Up</button>
-        <button onClick={showPlayer}>Player</button>
-        <button onClick={showSignIn}>Sign In</button>
->>>>>>> file-uploading
       </nav>
 
       {session && currentQueue && <MiniPlayer 
@@ -229,7 +209,6 @@ function App() {
           signedIn={signedIn}
         />
       }
-      {currentScreen == "sign-in" && <SignIn setSignedIn={setSignedIn} />}
     </>
   );
 }
