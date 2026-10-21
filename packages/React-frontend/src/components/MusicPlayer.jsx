@@ -71,8 +71,6 @@ function MusicPlayer({
 
           <div>{savedTracks}</div>
         </>
-      ) : !signedIn ? (
-        <p>Error: you're not signed in. Sign in to upload.</p>
       ) : (
         <>
           <input
