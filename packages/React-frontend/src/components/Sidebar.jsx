@@ -1,23 +1,25 @@
 import {
-  House,
-  MagnifyingGlass,
-  MusicNotes,
-  Heart,
-  ChartBar,
-  Stack,
-  SidebarSimple,
-  MusicNote,
+  HouseIcon,
+  MagnifyingGlassIcon,
+  MusicNotesIcon,
+  HeartIcon,
+  ChartBarIcon,
+  StackIcon,
+  UsersThreeIcon,
+  SidebarSimpleIcon,
+  MusicNoteIcon,
 } from "@phosphor-icons/react";
 import "../styles/Sidebar.css";
 
-// screen: null means the page doesn't exist yet, so the link does nothing
+// screen must match a currentScreen value handled in App.jsx
 const NAV_ITEMS = [
-  { label: "Home", icon: House, screen: "home" },
-  { label: "Search", icon: MagnifyingGlass, screen: null },
-  { label: "Genres", icon: MusicNotes, screen: null },
-  { label: "Favorites", icon: Heart, screen: null },
-  { label: "Taste Profile", icon: ChartBar, screen: null },
-  { label: "Collections", icon: Stack, screen: null },
+  { label: "Home", icon: HouseIcon, screen: "home" },
+  { label: "Search", icon: MagnifyingGlassIcon, screen: "search" },
+  { label: "Genres", icon: MusicNotesIcon, screen: "genres" },
+  { label: "Favorites", icon: HeartIcon, screen: "favorites" },
+  { label: "Taste Profile", icon: ChartBarIcon, screen: "taste-profile" },
+  { label: "Collections", icon: StackIcon, screen: "collections" },
+  { label: "Socials", icon: UsersThreeIcon, screen: "socials" },
 ];
 
 function Sidebar({ isOpen, onToggle, currentScreen, onNavigate, currentSong }) {
@@ -28,15 +30,15 @@ function Sidebar({ isOpen, onToggle, currentScreen, onNavigate, currentSong }) {
         onClick={onToggle}
         title={isOpen ? "Collapse sidebar" : "Expand sidebar"}
       >
-        <SidebarSimple size={22} />
+        <SidebarSimpleIcon size={22} />
       </button>
 
       <nav className="sidebar-nav">
         {NAV_ITEMS.map(({ label, icon: Icon, screen }) => (
           <button
             key={label}
-            className={`sidebar-link ${screen && currentScreen === screen ? "active" : ""}`}
-            onClick={() => screen && onNavigate(screen)}
+            className={`sidebar-link ${currentScreen === screen ? "active" : ""}`}
+            onClick={() => onNavigate(screen)}
             title={label}
           >
             <Icon size={22} />
@@ -51,7 +53,7 @@ function Sidebar({ isOpen, onToggle, currentScreen, onNavigate, currentSong }) {
           {currentSong?.coverUrl ? (
             <img src={currentSong.coverUrl} alt={currentSong.title} />
           ) : (
-            <MusicNote size={isOpen ? 40 : 22} />
+            <MusicNoteIcon size={isOpen ? 40 : 22} />
           )}
         </div>
         {isOpen && (

@@ -17,6 +17,7 @@ function Home({ session }){
     return (
         <div>
             <h2>Welcome, {username}</h2>
+            <h2>Home</h2>
         </div>
     );
 }

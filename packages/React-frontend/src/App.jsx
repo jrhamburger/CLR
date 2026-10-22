@@ -9,6 +9,13 @@ import SignIn from "./components/SignIn";
 import Home from "./components/Home";
 import Playlists from "./components/Playlists";
 import Sidebar from "./components/Sidebar";
+import ProfileMenu from "./components/ProfileMenu";
+import Search from "./components/Search";
+import Genres from "./components/Genres";
+import Favorites from "./components/Favorites";
+import TasteProfile from "./components/TasteProfile";
+import Collections from "./components/Collections";
+import Socials from "./components/Socials";
 
 function App() {
   const [currentScreen, setCurrentScreen] = useState("sign-up");
@@ -108,6 +115,12 @@ function App() {
 
         {currentScreen === "home" && <Home session={session} />}
         {currentScreen === "playlists" && <Playlists session={session} />}
+        {currentScreen === "search" && <Search />}
+        {currentScreen === "genres" && <Genres />}
+        {currentScreen === "favorites" && <Favorites />}
+        {currentScreen === "taste-profile" && <TasteProfile />}
+        {currentScreen === "collections" && <Collections />}
+        {currentScreen === "socials" && <Socials />}
 
         {currentScreen === "player" &&
           <MusicPlayer
@@ -130,6 +143,8 @@ function App() {
         setIsShuffle={setIsShuffle}
         setIsRepeating={setIsRepeating}
       />}
+
+      <ProfileMenu onSignOut={handleSignOut} />
     </div>
   );
 }
