@@ -73,6 +73,13 @@ button {
   box-sizing: border-box;
 }
 
+/* Signed-in layout spans the full window so the sidebar sits at the left edge */
+#root:has(.app-shell) {
+  width: 100%;
+  border-inline: none;
+  text-align: left;
+}
+
 h1,
 h2 {
   font-family: "SF Pro Display", Arial, sans-serif;

@@ -8,6 +8,7 @@ import MiniPlayer from './components/MiniPlayer';
 import SignIn from "./components/SignIn";
 import Home from "./components/Home";
 import Playlists from "./components/Playlists";
+import Sidebar from "./components/Sidebar";
 
 function App() {
   const [currentScreen, setCurrentScreen] = useState("sign-up");
@@ -19,6 +20,9 @@ function App() {
   const [isRepeating, setIsRepeating] = useState(false);
 
   const [session, setSession] = useState(null);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+
+  const currentSong = currentQueue[playOrder[playPosition]];
 
   useEffect(() => {
   supabase.auth.getSession().then(({ data }) => setSession(data.session));
@@ -70,18 +74,52 @@ function App() {
     setPlayPosition(startingIndex);
   }
 
-  return (
-    <>
-      <nav>
-        {session && <button onClick={handleSignOut}>Sign out</button>}
-        {!session && <button onClick={() => setCurrentScreen("sign-up")}>Sign Up</button>}
-        {!session && <button onClick={() => setCurrentScreen("sign-in")}>Sign In</button>}
-        {session && <button onClick={() => setCurrentScreen("home")}>Home</button>}
-        {session && <button onClick={() => setCurrentScreen("playlists")}>Playlists</button>}
-        {session && <button onClick={() => setCurrentScreen("player")}>Player</button>}
-      </nav>
+  if (!session) {
+    return (
+      <>
+        <nav>
+          <button onClick={() => setCurrentScreen("sign-up")}>Sign Up</button>
+          <button onClick={() => setCurrentScreen("sign-in")}>Sign In</button>
+        </nav>
 
-      {session && currentQueue && <MiniPlayer 
+        {currentScreen === "sign-up" && <SignUp />}
+        {currentScreen === "sign-in" && <SignIn />}
+      </>
+    );
+  }
+
+  return (
+    <div className="app-shell">
+      <Sidebar
+        isOpen={isSidebarOpen}
+        onToggle={() => setIsSidebarOpen(!isSidebarOpen)}
+        currentScreen={currentScreen}
+        onNavigate={setCurrentScreen}
+        currentSong={currentSong}
+      />
+
+      <div className="app-main">
+        <nav>
+          <button onClick={handleSignOut}>Sign out</button>
+          <button onClick={() => setCurrentScreen("home")}>Home</button>
+          <button onClick={() => setCurrentScreen("playlists")}>Playlists</button>
+          <button onClick={() => setCurrentScreen("player")}>Player</button>
+        </nav>
+
+        {currentScreen === "home" && <Home session={session} />}
+        {currentScreen === "playlists" && <Playlists session={session} />}
+
+        {currentScreen === "player" &&
+          <MusicPlayer
+            currentQueue={currentQueue}
+            playOrder={playOrder}
+            playPosition={playPosition}
+            onFileUpload={handleFileUpload}
+          />
+        }
+      </div>
+
+      {currentQueue && <MiniPlayer
         currentQueue={currentQueue}
         playOrder={playOrder} 
         playPosition={playPosition}
@@ -92,22 +130,7 @@ function App() {
         setIsShuffle={setIsShuffle}
         setIsRepeating={setIsRepeating}
       />}
-
-      {!session && currentScreen === "sign-up" && <SignUp />}
-      {!session && currentScreen === "sign-in" && <SignIn />}
-
-      {session && currentScreen === "home" && <Home session={session} />}
-      {session && currentScreen === "playlists" && <Playlists session={session} />}
-
-      {session && currentScreen === "player" && 
-        <MusicPlayer 
-          currentQueue={currentQueue}
-          playOrder={playOrder}
-          playPosition={playPosition} 
-          onFileUpload={handleFileUpload}
-        />
-      }
-    </>
+    </div>
   );
 }
 
