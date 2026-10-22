@@ -1,6 +1,8 @@
 import { useState, useEffect } from "react";
 import { supabase } from "../lib/supabase";
+import { PlaylistIcon, TrashIcon } from "@phosphor-icons/react";
 import PlaylistDetail from "./PlaylistDetail";
+import "../styles/Playlists.css";
 
 function Playlists({ session }) {
   const [playlists, setPlaylists] = useState([]);
@@ -85,16 +87,27 @@ async function handleDelete(playlist) {
 
       {playlists.length === 0 && <p>No playlists yet.</p>}
 
-      <ul>
+      <div className="playlist-grid">
         {playlists.map((playlist) => (
-          <li key={playlist.playlist_id}>
-            <button onClick={() => setSelected(playlist)}>
-              {playlist.playlist_name}
+          <div className="playlist-card" key={playlist.playlist_id}>
+            <button className="playlist-open" onClick={() => setSelected(playlist)}>
+              {/* Placeholder until playlists have their own cover image */}
+              <div className="playlist-cover">
+                <PlaylistIcon size={48} />
+              </div>
+              <span className="playlist-name">{playlist.playlist_name}</span>
             </button>
-            <button onClick={() => handleDelete(playlist)}>Delete</button>
-          </li>
+
+            <button
+              className="playlist-delete"
+              onClick={() => handleDelete(playlist)}
+              title="Delete playlist"
+            >
+              <TrashIcon size={16} />
+            </button>
+          </div>
         ))}
-      </ul>
+      </div>
 
       {message && <p>{message}</p>}
     </div>

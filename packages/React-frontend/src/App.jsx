@@ -16,6 +16,8 @@ import Favorites from "./components/Favorites";
 import TasteProfile from "./components/TasteProfile";
 import Collections from "./components/Collections";
 import Socials from "./components/Socials";
+import NowPlaying from "./components/NowPlaying";
+import NowPlayingPanel from "./components/NowPlayingPanel";
 
 function App() {
   const [currentScreen, setCurrentScreen] = useState("sign-up");
@@ -30,8 +32,10 @@ function App() {
   const [savedTracks, setSavedTracks] = useState([]);
   const [signedIn, setSignedIn] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+  const [panelMode, setPanelMode] = useState("open"); // right column: "open" | "mini" | "hidden"
 
   const currentSong = currentQueue[playOrder[playPosition]];
+  const upNext = playOrder.slice(playPosition + 1).map((index) => currentQueue[index]);
 
   useEffect(() => {
   supabase.auth.getSession().then(({ data }) => setSession(data.session));
@@ -211,6 +215,7 @@ function App() {
           <button onClick={() => setCurrentScreen("home")}>Home</button>
           <button onClick={() => setCurrentScreen("playlists")}>Playlists</button>
           <button onClick={() => setCurrentScreen("player")}>Player</button>
+          <button onClick={() => setCurrentScreen("now-playing")}>Now Playing</button>
         </nav>
 
         {currentScreen === "home" && <Home session={session} />}
@@ -221,6 +226,9 @@ function App() {
         {currentScreen === "taste-profile" && <TasteProfile />}
         {currentScreen === "collections" && <Collections />}
         {currentScreen === "socials" && <Socials />}
+        {currentScreen === "now-playing" && (
+          <NowPlaying currentSong={currentSong} upNext={upNext} />
+        )}
 
         {currentScreen === "player" &&
           <MusicPlayer
@@ -231,6 +239,16 @@ function App() {
           />
         }
       </div>
+
+      {/* On the Now Playing page the column's content is the page itself */}
+      {currentScreen !== "now-playing" && (
+        <NowPlayingPanel
+          mode={panelMode}
+          onChangeMode={setPanelMode}
+          currentSong={currentSong}
+          upNext={upNext}
+        />
+      )}
 
       {currentQueue && <MiniPlayer
         currentQueue={currentQueue}

@@ -1,0 +1,75 @@
+/* Fills left to right, then wraps to the next row */
+.playlist-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    gap: 24px;
+    margin-top: 20px;
+}
+
+.playlist-card {
+    position: relative;
+}
+
+.playlist-open {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    width: 100%;
+    padding: 0;
+
+    border: none;
+    background: none;
+    text-align: left;
+    cursor: pointer;
+}
+
+.playlist-cover {
+    width: 100%;
+    aspect-ratio: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 10px;
+    background: var(--code-bg);
+    color: var(--text);
+    transition: transform 0.15s ease;
+}
+
+.playlist-open:hover .playlist-cover {
+    transform: scale(1.03);
+}
+
+.playlist-name {
+    width: 100%;
+    color: var(--text-h);
+    font-size: 15px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* Delete button shows in the cover's corner on hover */
+.playlist-delete {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    display: flex;
+    padding: 6px;
+
+    border: none;
+    border-radius: 50%;
+    background: var(--bg);
+    color: var(--text-h);
+    opacity: 0;
+    cursor: pointer;
+    transition: opacity 0.15s ease;
+}
+
+.playlist-card:hover .playlist-delete {
+    opacity: 1;
+}
+
+.playlist-delete:hover {
+    color: #e5484d;
+}
