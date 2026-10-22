@@ -1,0 +1,54 @@
+:root {
+    --nav-outline: rgba(0, 0, 0, 0.15);
+    --nav-hover-bg: rgba(0, 0, 0, 0.04);
+}
+
+@media (prefers-color-scheme: dark) {
+    :root {
+        --nav-outline: rgba(255, 255, 255, 0.25);
+        --nav-hover-bg: rgba(255, 255, 255, 0.06);
+    }
+}
+
+.top-nav {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 24px;
+}
+
+/* Transparent pill buttons with a thin outline */
+.top-nav button {
+    padding: 8px 18px;
+
+    border: 1px solid var(--nav-outline);
+    border-radius: 999px;
+    background: transparent;
+    color: var(--text-h);
+
+    font-family: "SF Pro Display", Arial, sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+    letter-spacing: 0.3px;
+
+    cursor: pointer;
+    transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+}
+
+.top-nav button:hover {
+    background: var(--nav-hover-bg);
+    border-color: var(--text-h);
+}
+
+.top-nav button.active {
+    border-color: var(--accent);
+    background: var(--accent-bg);
+    color: var(--accent);
+}
+
+/* Sign out sits apart, at the far right */
+.top-nav .sign-out {
+    margin-left: auto;
+    color: var(--text);
+}

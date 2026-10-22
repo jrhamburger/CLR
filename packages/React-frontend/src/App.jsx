@@ -18,6 +18,14 @@ import Collections from "./components/Collections";
 import Socials from "./components/Socials";
 import NowPlaying from "./components/NowPlaying";
 import NowPlayingPanel from "./components/NowPlayingPanel";
+import "./styles/TopNav.css";
+
+const TOP_NAV_ITEMS = [
+  { label: "Home", screen: "home" },
+  { label: "Playlists", screen: "playlists" },
+  { label: "Player", screen: "player" },
+  { label: "Now Playing", screen: "now-playing" },
+];
 
 function App() {
   const [currentScreen, setCurrentScreen] = useState("sign-up");
@@ -210,12 +218,17 @@ function App() {
       />
 
       <div className="app-main">
-        <nav>
-          <button onClick={handleSignOut}>Sign out</button>
-          <button onClick={() => setCurrentScreen("home")}>Home</button>
-          <button onClick={() => setCurrentScreen("playlists")}>Playlists</button>
-          <button onClick={() => setCurrentScreen("player")}>Player</button>
-          <button onClick={() => setCurrentScreen("now-playing")}>Now Playing</button>
+        <nav className="top-nav">
+          {TOP_NAV_ITEMS.map(({ label, screen }) => (
+            <button
+              key={screen}
+              className={currentScreen === screen ? "active" : ""}
+              onClick={() => setCurrentScreen(screen)}
+            >
+              {label}
+            </button>
+          ))}
+          <button className="sign-out" onClick={handleSignOut}>Sign out</button>
         </nav>
 
         {currentScreen === "home" && <Home session={session} />}
