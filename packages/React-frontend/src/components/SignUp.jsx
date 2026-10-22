@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { supabase } from "../lib/supabase";
+import "../styles/SignUp.css";
 
 import "../styles/SignUp.css"
 
@@ -28,46 +29,48 @@ function SignUp() {
             options: { data : {user_name: username } },
         });
 
-        if (error) {
-            setMessage(error.message);
-        } else {
-            setMessage("Check your email to confirm your account.");
-        }
+    if (error) {
+      setMessage(error.message);
+    } else {
+      setMessage("Check your email to confirm your account.");
     }
+  }
 
     return (
+      <>
         <form className="signup-form" onSubmit={handleSubmit}>
             <h2>Create an account</h2>
             
-            <input
-                type="text"
-                placeholder="Username"
-                value={username}
-                onChange={(event) => setUsername(event.target.value)}
-                required
-            />
+        <input
+            type="text"
+            placeholder="Username"
+            value={username}
+            onChange={(event) => setUsername(event.target.value)}
+            required
+        />
 
-            <input
-                type="email"
-                placeholder="Email"
-                value={email}
-                onChange={(event) => setEmail(event.target.value)}
-                required
-            />
+        <input
+          type="email"
+          placeholder="Email"
+          value={email}
+          onChange={(event) => setEmail(event.target.value)}
+          required
+        />
 
-            <input 
-                type="password"
-                placeholder="Password"
-                value={password}
-                onChange={(event) => setPassword(event.target.value)}
-                required
-            />
+        <input
+          type="password"
+          placeholder="Password"
+          value={password}
+          onChange={(event) => setPassword(event.target.value)}
+          required
+        />
 
-            <button type="submit">Sign up</button>
+        <button type="submit">Sign up</button>
 
-            {message && <p>{message}</p>}
-        </form>
-    );
+        {message && <p>{message}</p>}
+      </form>
+    </>
+  );
 }
 
 export default SignUp;
