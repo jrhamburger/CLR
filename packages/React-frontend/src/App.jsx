@@ -58,18 +58,6 @@ function App() {
     return () => listener.subscription.unsubscribe();
   }, []);   
 
-  function showSignUp() {
-    setCurrentScreen("sign-up");
-  }
-
-  function showPlayer() {
-    setCurrentScreen("player");
-  }
-
-  function showSignIn(){
-    setCurrentScreen("sign-in");
-  }
-
   async function handleSignOut() {
     await supabase.auth.signOut();
   }
@@ -147,7 +135,7 @@ function App() {
           <button className="sign-out" onClick={handleSignOut}>Sign out</button>
         </nav>
 
-        {currentScreen === "home" && <Home session={session} />}
+        {currentScreen === "home" && <Home session={session} onStartQueue={startQueue} />}
         {currentScreen === "playlists" && <Playlists session={session} />}
         {currentScreen === "search" && <Search />}
         {currentScreen === "genres" && <Genres />}
