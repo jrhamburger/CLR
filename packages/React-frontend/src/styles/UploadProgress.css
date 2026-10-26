@@ -1,0 +1,27 @@
+.upload-progress {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    width: min(100%, 320px);
+    margin: 12px 0;
+}
+
+.upload-progress p {
+    color: var(--text-h);
+    font-size: 14px;
+}
+
+/* Same purple-on-off-white look as the player's seek bar */
+.upload-progress-track {
+    height: 5px;
+    border-radius: 3px;
+    background: #e8e4ef;
+    overflow: hidden;
+}
+
+.upload-progress-fill {
+    height: 100%;
+    border-radius: 3px;
+    background: var(--accent);
+    transition: width 0.3s ease;
+}
