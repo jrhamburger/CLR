@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import './App.css'
 import { supabase } from "./lib/supabase";
 import { uploadFiles } from "./lib/fileuploading";
+import { SCREENS, assertValidScreen } from "./constants/screens";
 
 import SignUp from "./components/SignUp";
 import MusicPlayer from "./components/MusicPlayer";
@@ -22,14 +23,20 @@ import NowPlayingPanel from "./components/NowPlayingPanel";
 import "./styles/TopNav.css";
 
 const TOP_NAV_ITEMS = [
-  { label: "Home", screen: "home" },
-  { label: "Playlists", screen: "playlists" },
-  { label: "Player", screen: "player" },
-  { label: "Now Playing", screen: "now-playing" },
+  { label: "Home", screen: SCREENS.HOME },
+  { label: "Playlists", screen: SCREENS.PLAYLISTS },
+  { label: "Player", screen: SCREENS.PLAYER },
+  { label: "Now Playing", screen: SCREENS.NOW_PLAYING },
 ];
 
 function App() {
-  const [currentScreen, setCurrentScreen] = useState("sign-up");
+  const [currentScreen, setCurrentScreen] = useState(SCREENS.SIGN_UP);
+
+  // Always change screens through this so a bad screen name fails loudly
+  function navigate(screen) {
+    assertValidScreen(screen);
+    setCurrentScreen(screen);
+  }
   const [currentQueue, setCurrentQueue] = useState([]);
   const [playOrder, setPlayOrder] = useState([]);
   const [playPosition, setPlayPosition] = useState(0);
@@ -52,7 +59,7 @@ function App() {
   const { data: listener } = supabase.auth.onAuthStateChange(
     (_event, session) => {
       setSession(session);
-      setCurrentScreen(session ? "home" : "sign-in");
+      navigate(session ? SCREENS.HOME : SCREENS.SIGN_IN);
     }
     );
     return () => listener.subscription.unsubscribe();
@@ -101,12 +108,12 @@ function App() {
     return (
       <>
         <nav>
-          <button onClick={() => setCurrentScreen("sign-up")}>Sign Up</button>
-          <button onClick={() => setCurrentScreen("sign-in")}>Sign In</button>
+          <button onClick={() => navigate(SCREENS.SIGN_UP)}>Sign Up</button>
+          <button onClick={() => navigate(SCREENS.SIGN_IN)}>Sign In</button>
         </nav>
 
-        {currentScreen === "sign-up" && <SignUp />}
-        {currentScreen === "sign-in" && <SignIn />}
+        {currentScreen === SCREENS.SIGN_UP && <SignUp />}
+        {currentScreen === SCREENS.SIGN_IN && <SignIn />}
       </>
     );
   }
@@ -117,7 +124,7 @@ function App() {
         isOpen={isSidebarOpen}
         onToggle={() => setIsSidebarOpen(!isSidebarOpen)}
         currentScreen={currentScreen}
-        onNavigate={setCurrentScreen}
+        onNavigate={navigate}
         currentSong={currentSong}
       />
 
@@ -127,7 +134,7 @@ function App() {
             <button
               key={screen}
               className={currentScreen === screen ? "active" : ""}
-              onClick={() => setCurrentScreen(screen)}
+              onClick={() => navigate(screen)}
             >
               {label}
             </button>
@@ -135,19 +142,19 @@ function App() {
           <button className="sign-out" onClick={handleSignOut}>Sign out</button>
         </nav>
 
-        {currentScreen === "home" && <Home session={session} onStartQueue={startQueue} />}
-        {currentScreen === "playlists" && <Playlists session={session} />}
-        {currentScreen === "search" && <Search />}
-        {currentScreen === "genres" && <Genres />}
-        {currentScreen === "favorites" && <Favorites />}
-        {currentScreen === "taste-profile" && <TasteProfile />}
-        {currentScreen === "collections" && <Collections />}
-        {currentScreen === "socials" && <Socials />}
-        {currentScreen === "now-playing" && (
+        {currentScreen === SCREENS.HOME && <Home session={session} onStartQueue={startQueue} />}
+        {currentScreen === SCREENS.PLAYLISTS && <Playlists session={session} />}
+        {currentScreen === SCREENS.SEARCH && <Search />}
+        {currentScreen === SCREENS.GENRES && <Genres />}
+        {currentScreen === SCREENS.FAVORITES && <Favorites />}
+        {currentScreen === SCREENS.TASTE_PROFILE && <TasteProfile />}
+        {currentScreen === SCREENS.COLLECTIONS && <Collections />}
+        {currentScreen === SCREENS.SOCIALS && <Socials />}
+        {currentScreen === SCREENS.NOW_PLAYING && (
           <NowPlaying currentSong={currentSong} upNext={upNext} />
         )}
 
-        {currentScreen === "player" &&
+        {currentScreen === SCREENS.PLAYER &&
           <MusicPlayer
             currentQueue={currentQueue}
             playOrder={playOrder}
@@ -159,7 +166,7 @@ function App() {
       </div>
 
       {/* On the Now Playing page the column's content is the page itself */}
-      {currentScreen !== "now-playing" && (
+      {currentScreen !== SCREENS.NOW_PLAYING && (
         <NowPlayingPanel
           mode={panelMode}
           onChangeMode={setPanelMode}
