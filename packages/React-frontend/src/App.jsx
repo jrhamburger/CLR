@@ -62,7 +62,7 @@ function App() {
     nextTrack: handleNextTrack,
     previousTrack: handlePreviousTrack,
     toggleShuffle: handleToggleShuffle,
-    toggleRepeat: handleToggleRepeat,
+    toggleRepeat: handleToggleRepeat
   };
 
   useEffect(() => {
@@ -223,78 +223,76 @@ function App() {
     }
   }
 
-   function handlePreviousTrack() {
-     if (!audioRef.current || !currentSong) return;
+  function handlePreviousTrack() {
+    if (!audioRef.current || !currentSong) return;
 
-     if (audioRef.current.currentTime < 1 && playPosition > 0) {
-       setPlayPosition((position) => position - 1);
-     } else {
-       audioRef.current.currentTime = 0;
-       setCurrentTime(0);
-     }
-   }
+    if (audioRef.current.currentTime < 1 && playPosition > 0) {
+      setPlayPosition((position) => position - 1);
+    } else {
+      audioRef.current.currentTime = 0;
+      setCurrentTime(0);
+    }
+  }
 
-   function handleToggleShuffle() {
-     if (!currentSong) return;
+  function handleToggleShuffle() {
+    if (!currentSong) return;
 
-     if (!isShuffle) {
-       const shuffledOrder = createShuffleOrder(
-         currentQueue.length
-       );
+    if (!isShuffle) {
+      const shuffledOrder = createShuffleOrder(
+        currentQueue.length
+      );
 
-       const currentPositionInOrder = shuffledOrder.indexOf(
-         currentTrackIndex
-       );
+      const currentPositionInOrder = shuffledOrder.indexOf(
+        currentTrackIndex
+      );
 
-       [
-         shuffledOrder[0],
-         shuffledOrder[currentPositionInOrder]
-       ] = [
-         shuffledOrder[currentPositionInOrder],
-         shuffledOrder[0]
-       ];
+      [
+        shuffledOrder[0],
+        shuffledOrder[currentPositionInOrder]
+      ] = [
+        shuffledOrder[currentPositionInOrder],
+        shuffledOrder[0]
+      ];
 
-       setPlayOrder(shuffledOrder);
-       setPlayPosition(0);
-       setIsShuffle(true);
-     } else {
-       const normalOrder = currentQueue.map(
-         (_, index) => index
-       );
+      setPlayOrder(shuffledOrder);
+      setPlayPosition(0);
+      setIsShuffle(true);
+    } else {
+      const normalOrder = currentQueue.map((_, index) => index);
 
-       setPlayOrder(normalOrder);
-       setPlayPosition(currentTrackIndex);
-       setIsShuffle(false);
-     }
-   }
+      setPlayOrder(normalOrder);
+      setPlayPosition(currentTrackIndex);
+      setIsShuffle(false);
+    }
+  }
 
-   function handleToggleRepeat() {
-     if (isRepeating) {
-       setIsRepeating(false);
-     } else {
-       setIsRepeating(true);
-     }
-   }
+  function handleToggleRepeat() {
+    if (isRepeating) {
+      setIsRepeating(false);
+    } else {
+      setIsRepeating(true);
+    }
+  }
 
-   function createShuffleOrder(queueLength) {
-     const order = Array.from(
-       { length: queueLength },
-       (_, index) => index
-     );
+  function createShuffleOrder(queueLength) {
+    const order = Array.from(
+      { length: queueLength },
+      (_, index) => index
+    );
 
-     for (let index = order.length - 1; index > 0; --index) {
-       const randomIndex = Math.floor(
-         Math.random() * (index + 1)
-       );
+    for (let index = order.length - 1; index > 0; --index) {
+      const randomIndex = Math.floor(
+        Math.random() * (index + 1)
+      );
 
-       [order[index], order[randomIndex]] = [
-         order[randomIndex],
-         order[index]
-       ];
-     }
+      [order[index], order[randomIndex]] = [
+        order[randomIndex],
+        order[index]
+      ];
+    }
 
-     return order;
-   }
+    return order;
+  }
 
   if (!session) {
     return (
