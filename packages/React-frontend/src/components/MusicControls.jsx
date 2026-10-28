@@ -12,6 +12,8 @@ import "../styles/MusicControls.css";
 
 function MusicControls({
     isPlaying,
+    isShuffle,
+    isRepeating,
     currentTime,
     duration,
     onTogglePlay,

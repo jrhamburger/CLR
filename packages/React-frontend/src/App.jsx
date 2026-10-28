@@ -1,12 +1,12 @@
-import { useState, useEffect } from 'react'
-import './App.css'
+import { useState, useEffect } from "react";
+import "./App.css";
 import { supabase } from "./lib/supabase";
 import { uploadFiles } from "./lib/fileuploading";
 import { SCREENS, assertValidScreen } from "./constants/screens";
 
 import SignUp from "./components/SignUp";
 import MusicPlayer from "./components/MusicPlayer";
-import MiniPlayer from './components/MiniPlayer';
+import MiniPlayer from "./components/MiniPlayer";
 import SignIn from "./components/SignIn";
 import Home from "./components/Home";
 import Playlists from "./components/Playlists";
@@ -52,7 +52,27 @@ function App() {
   const [panelMode, setPanelMode] = useState("open"); // right column: "open" | "mini" | "hidden"
 
   const currentSong = currentQueue[playOrder[playPosition]];
-  const upNext = playOrder.slice(playPosition + 1).map((index) => currentQueue[index]);
+  const upNext = playOrder
+    .slice(playPosition + 1)
+    .map((index) => currentQueue[index]);
+
+  const queue = {
+    tracks: currentQueue,
+    order: playOrder,
+    position: playPosition
+  };
+
+  const modes = {
+    isShuffle,
+    isRepeating
+  };
+
+  const controls = {
+    nextTrack: handleNextTrack,
+    previousTrack: handlePreviousTrack,
+    toggleShuffle: handleToggleShuffle,
+    toggleRepeat: handleToggleRepeat
+  };
 
   useEffect(() => {
   supabase.auth.getSession().then(({ data }) => setSession(data.session));
@@ -63,7 +83,7 @@ function App() {
     }
     );
     return () => listener.subscription.unsubscribe();
-  }, []);   
+  }, []);
 
   async function handleSignOut() {
     await supabase.auth.signOut();
@@ -104,6 +124,87 @@ function App() {
     setPlayPosition(startingIndex);
   }
 
+  function handleNextTrack() {
+    if (!audioRef.current || !currentSong) return;
+
+    if (playPosition < playOrder.length - 1) {
+      setPlayPosition((position) => position + 1);
+    } else if (isRepeating) {
+      setPlayPosition(0);
+    }
+  }
+
+  function handlePreviousTrack() {
+    if (!audioRef.current || !currentSong) return;
+
+    if (audioRef.current.currentTime < 1 && playPosition > 0) {
+      setPlayPosition((position) => position - 1);
+    } else {
+      audioRef.current.currentTime = 0;
+      setCurrentTime(0);
+    }
+  }
+
+  function handleToggleShuffle() {
+    if (!currentSong) return;
+
+    if (!isShuffle) {
+      const shuffledOrder = createShuffleOrder(
+        currentQueue.length
+      );
+
+      const currentPositionInOrder = shuffledOrder.indexOf(
+        currentTrackIndex
+      );
+
+      [
+        shuffledOrder[0],
+        shuffledOrder[currentPositionInOrder]
+      ] = [
+        shuffledOrder[currentPositionInOrder],
+        shuffledOrder[0]
+      ];
+
+      setPlayOrder(shuffledOrder);
+      setPlayPosition(0);
+      setIsShuffle(true);
+    } else {
+      const normalOrder = currentQueue.map((_, index) => index);
+
+      setPlayOrder(normalOrder);
+      setPlayPosition(currentTrackIndex);
+      setIsShuffle(false);
+    }
+  }
+
+  function handleToggleRepeat() {
+    if (isRepeating) {
+      setIsRepeating(false);
+    } else {
+      setIsRepeating(true);
+    }
+  }
+
+  function createShuffleOrder(queueLength) {
+    const order = Array.from(
+      { length: queueLength },
+      (_, index) => index
+    );
+
+    for (let index = order.length - 1; index > 0; --index) {
+      const randomIndex = Math.floor(
+        Math.random() * (index + 1)
+      );
+
+      [order[index], order[randomIndex]] = [
+        order[randomIndex],
+        order[index]
+      ];
+    }
+
+    return order;
+  }
+
   if (!session) {
     return (
       <>
@@ -139,7 +240,9 @@ function App() {
               {label}
             </button>
           ))}
-          <button className="sign-out" onClick={handleSignOut}>Sign out</button>
+          <button className="sign-out" onClick={handleSignOut}>
+            Sign out
+          </button>
         </nav>
 
         {currentScreen === SCREENS.HOME && <Home session={session} onStartQueue={startQueue} />}
@@ -162,7 +265,7 @@ function App() {
             onFileUpload={handleFileUpload}
             uploadProgress={uploadProgress}
           />
-        }
+        )}
       </div>
 
       {/* On the Now Playing page the column's content is the page itself */}
@@ -175,17 +278,13 @@ function App() {
         />
       )}
 
-      {currentQueue && <MiniPlayer
-        currentQueue={currentQueue}
-        playOrder={playOrder} 
-        playPosition={playPosition}
-        setPlayPosition={setPlayPosition}
-        setPlayOrder={setPlayOrder}
-        isShuffle={isShuffle}
-        isRepeating={isRepeating}
-        setIsShuffle={setIsShuffle}
-        setIsRepeating={setIsRepeating}
-      />}
+      {currentQueue && (
+        <MiniPlayer
+          queue={queue}
+          modes={modes}
+          controls={controls}
+        />
+      )}
 
       <ProfileMenu onSignOut={handleSignOut} />
     </div>
