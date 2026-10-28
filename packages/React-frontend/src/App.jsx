@@ -1,6 +1,8 @@
 import { useState, useEffect } from "react";
 import "./App.css";
 import { supabase } from "./lib/supabase";
+import { uploadFiles } from "./lib/fileuploading";
+import { SCREENS, assertValidScreen } from "./constants/screens";
 
 import SignUp from "./components/SignUp";
 import MusicPlayer from "./components/MusicPlayer";
@@ -21,14 +23,20 @@ import NowPlayingPanel from "./components/NowPlayingPanel";
 import "./styles/TopNav.css";
 
 const TOP_NAV_ITEMS = [
-  { label: "Home", screen: "home" },
-  { label: "Playlists", screen: "playlists" },
-  { label: "Player", screen: "player" },
-  { label: "Now Playing", screen: "now-playing" }
+  { label: "Home", screen: SCREENS.HOME },
+  { label: "Playlists", screen: SCREENS.PLAYLISTS },
+  { label: "Player", screen: SCREENS.PLAYER },
+  { label: "Now Playing", screen: SCREENS.NOW_PLAYING },
 ];
 
 function App() {
-  const [currentScreen, setCurrentScreen] = useState("sign-up");
+  const [currentScreen, setCurrentScreen] = useState(SCREENS.SIGN_UP);
+
+  // Always change screens through this so a bad screen name fails loudly
+  function navigate(screen) {
+    assertValidScreen(screen);
+    setCurrentScreen(screen);
+  }
   const [currentQueue, setCurrentQueue] = useState([]);
   const [playOrder, setPlayOrder] = useState([]);
   const [playPosition, setPlayPosition] = useState(0);
@@ -40,6 +48,7 @@ function App() {
   const [savedTracks, setSavedTracks] = useState([]);
   const [signedIn, setSignedIn] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+  const [uploadProgress, setUploadProgress] = useState(null); // { done, total } while uploading
   const [panelMode, setPanelMode] = useState("open"); // right column: "open" | "mini" | "hidden"
 
   const currentSong = currentQueue[playOrder[playPosition]];
@@ -66,14 +75,12 @@ function App() {
   };
 
   useEffect(() => {
-    supabase.auth
-      .getSession()
-      .then(({ data }) => setSession(data.session));
-    const { data: listener } = supabase.auth.onAuthStateChange(
-      (_event, session) => {
-        setSession(session);
-        setCurrentScreen(session ? "home" : "sign-in");
-      }
+  supabase.auth.getSession().then(({ data }) => setSession(data.session));
+  const { data: listener } = supabase.auth.onAuthStateChange(
+    (_event, session) => {
+      setSession(session);
+      navigate(session ? SCREENS.HOME : SCREENS.SIGN_IN);
+    }
     );
     return () => listener.subscription.unsubscribe();
   }, []);
@@ -82,127 +89,31 @@ function App() {
     await supabase.auth.signOut();
   }
 
-  // TODO: Fix this function
   async function handleFileUpload(event) {
     const files = Array.from(event.target.files ?? []);
+    // Reset so the same file(s) can be picked again later
+    event.target.value = "";
 
-    if (files.length === 0) return;
-
-    const {
-      data: { user },
-      error: userError
-    } = await supabase.auth.getUser();
-
-    if (userError) {
-      console.error(userError);
+    if (files.length === 0) 
       return;
+
+    setUploadProgress({ done: 0, total: files.length });
+
+    const { uploaded, failed } = await uploadFiles(
+      files,
+      session.user.id,
+      (done, total) => setUploadProgress({ done, total })
+    );
+
+    setUploadProgress(null);
+    setSavedTracks((currentTracks) => [...uploaded, ...currentTracks]);
+
+    if (failed.length > 0) {
+      console.log(failed);
+      alert(`${uploaded.length} uploaded; ${failed.length} failed.`);
+    } else {
+      alert(`${uploaded.length} song(s) uploaded successfully.`);
     }
-    if (!user)
-      throw new Error("You must be logged in to upload.");
-
-    const uploadedTracks = [];
-    const failedFiles = [];
-
-    for (const file of files) {
-      if (!file.type.startsWith("audio/")) {
-        failedFiles.push(`${file.name} is not an audio file.`);
-        continue;
-      }
-
-      const safeFileName = file.name.replace(
-        /[^a-zA-Z0-9._-]/g,
-        "_"
-      );
-
-      const audioPath = `${user.id}/${crypto.randomUUID()}-${safeFileName}`;
-
-      // 1. Upload the actual audio file to storage
-      const { error: uploadError } = await supabase.storage
-        .from("audio-files")
-        .upload(audioPath, file, {
-          contentType: file.type,
-          upsert: false
-        });
-
-      if (uploadError) {
-        console.error(uploadError);
-        failedFiles.push(`Could not upload ${file.name}.`);
-        continue;
-      }
-
-      // 2. Create its tracks-table row.
-      const title = file.name.replace(/\.[^/.]+$/, "");
-
-      const { data: newTrack, error: trackError } =
-        await supabase
-          .from("tracks")
-          .insert({
-            title,
-            owner_id: user.id,
-            audio_path: audioPath
-          })
-          .select()
-          .single();
-
-      if (trackError) {
-        console.error(trackError);
-        failedFiles.push(
-          `Could not save ${file.name}'s track information.`
-        );
-
-        await supabase.storage
-          .from("audio-files")
-          .remove([audioPath]);
-        continue;
-      }
-
-      // 3. Save that track to this user's library.
-      const { error: savedTrackError } = await supabase
-        .from("user_tracks")
-        .insert({
-          user_id: user.id,
-          track_id: newTrack.id
-        });
-
-      if (savedTrackError) {
-        console.error(savedTrackError);
-        failedFiles.push(
-          `Could not add ${file.name} to the library.`
-        );
-        continue;
-      }
-
-      uploadedTracks.push(newTrack);
-
-      // Immediately update React state with all successful uploads.
-      setSavedTracks((currentTracks) => [
-        ...uploadedTracks,
-        ...currentTracks
-      ]);
-
-      if (failedFiles.length > 0) {
-        console.log(failedFiles);
-        alert(
-          `${uploadedTracks.length} uploaded; ${failedFiles.length} failed.`
-        );
-      } else {
-        alert(
-          `${uploadedTracks.length} song(s) uploaded successfully.`
-        );
-      }
-
-      // Allows the user to select the same file(s) again later if needed.
-      event.target.value = "";
-    }
-
-    // const uploadedSongs = files.map((file) => ({
-    //   title: file.name,
-    //   audioUrl: URL.createObjectURL(file),
-    // }))
-
-    // startQueue(uploadedSongs);
-
-    // event.target.value = "";
   }
 
   function startQueue(tracks, startingIndex = 0) {
@@ -298,16 +209,12 @@ function App() {
     return (
       <>
         <nav>
-          <button onClick={() => setCurrentScreen("sign-up")}>
-            Sign Up
-          </button>
-          <button onClick={() => setCurrentScreen("sign-in")}>
-            Sign In
-          </button>
+          <button onClick={() => navigate(SCREENS.SIGN_UP)}>Sign Up</button>
+          <button onClick={() => navigate(SCREENS.SIGN_IN)}>Sign In</button>
         </nav>
 
-        {currentScreen === "sign-up" && <SignUp />}
-        {currentScreen === "sign-in" && <SignIn />}
+        {currentScreen === SCREENS.SIGN_UP && <SignUp />}
+        {currentScreen === SCREENS.SIGN_IN && <SignIn />}
       </>
     );
   }
@@ -318,7 +225,7 @@ function App() {
         isOpen={isSidebarOpen}
         onToggle={() => setIsSidebarOpen(!isSidebarOpen)}
         currentScreen={currentScreen}
-        onNavigate={setCurrentScreen}
+        onNavigate={navigate}
         currentSong={currentSong}
       />
 
@@ -327,10 +234,9 @@ function App() {
           {TOP_NAV_ITEMS.map(({ label, screen }) => (
             <button
               key={screen}
-              className={
-                currentScreen === screen ? "active" : ""
-              }
-              onClick={() => setCurrentScreen(screen)}>
+              className={currentScreen === screen ? "active" : ""}
+              onClick={() => navigate(screen)}
+            >
               {label}
             </button>
           ))}
@@ -339,37 +245,31 @@ function App() {
           </button>
         </nav>
 
-        {currentScreen === "home" && (
-          <Home session={session} onStartQueue={startQueue} />
-        )}
-        {currentScreen === "playlists" && (
-          <Playlists session={session} />
-        )}
-        {currentScreen === "search" && <Search />}
-        {currentScreen === "genres" && <Genres />}
-        {currentScreen === "favorites" && <Favorites />}
-        {currentScreen === "taste-profile" && <TasteProfile />}
-        {currentScreen === "collections" && <Collections />}
-        {currentScreen === "socials" && <Socials />}
-        {currentScreen === "now-playing" && (
-          <NowPlaying
-            currentSong={currentSong}
-            upNext={upNext}
-          />
+        {currentScreen === SCREENS.HOME && <Home session={session} onStartQueue={startQueue} />}
+        {currentScreen === SCREENS.PLAYLISTS && <Playlists session={session} />}
+        {currentScreen === SCREENS.SEARCH && <Search />}
+        {currentScreen === SCREENS.GENRES && <Genres />}
+        {currentScreen === SCREENS.FAVORITES && <Favorites />}
+        {currentScreen === SCREENS.TASTE_PROFILE && <TasteProfile />}
+        {currentScreen === SCREENS.COLLECTIONS && <Collections />}
+        {currentScreen === SCREENS.SOCIALS && <Socials />}
+        {currentScreen === SCREENS.NOW_PLAYING && (
+          <NowPlaying currentSong={currentSong} upNext={upNext} />
         )}
 
-        {currentScreen === "player" && (
+        {currentScreen === SCREENS.PLAYER &&
           <MusicPlayer
             currentQueue={currentQueue}
             playOrder={playOrder}
             playPosition={playPosition}
             onFileUpload={handleFileUpload}
+            uploadProgress={uploadProgress}
           />
         )}
       </div>
 
       {/* On the Now Playing page the column's content is the page itself */}
-      {currentScreen !== "now-playing" && (
+      {currentScreen !== SCREENS.NOW_PLAYING && (
         <NowPlayingPanel
           mode={panelMode}
           onChangeMode={setPanelMode}

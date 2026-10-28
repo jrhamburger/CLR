@@ -1,12 +1,14 @@
 import { motion } from "framer-motion";
 import { useRef, useState, useEffect } from "react";
 import MusicControls from "./MusicControls";
+import UploadProgress from "./UploadProgress";
 
 function MusicPlayer({
   currentQueue,
   playOrder,
   playPosition,
   onFileUpload,
+  uploadProgress,
   savedTracks,
   signedIn
 }) {
@@ -78,7 +80,9 @@ function MusicPlayer({
             multiple
             accept="audio/*"
             onChange={onFileUpload}
+            disabled={Boolean(uploadProgress)}
           />
+          {uploadProgress && <UploadProgress {...uploadProgress} />}
           <p>No song selected yet.</p>
         </>
       )}

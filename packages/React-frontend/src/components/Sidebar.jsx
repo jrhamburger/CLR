@@ -9,17 +9,18 @@ import {
   SidebarSimpleIcon,
   MusicNoteIcon,
 } from "@phosphor-icons/react";
+import { SCREENS } from "../constants/screens";
 import "../styles/Sidebar.css";
 
-// screen must match a currentScreen value handled in App.jsx
+// screen values come from constants/screens.js
 const NAV_ITEMS = [
-  { label: "Home", icon: HouseIcon, screen: "home" },
-  { label: "Search", icon: MagnifyingGlassIcon, screen: "search" },
-  { label: "Genres", icon: MusicNotesIcon, screen: "genres" },
-  { label: "Favorites", icon: HeartIcon, screen: "favorites" },
-  { label: "Taste Profile", icon: ChartBarIcon, screen: "taste-profile" },
-  { label: "Collections", icon: StackIcon, screen: "collections" },
-  { label: "Socials", icon: UsersThreeIcon, screen: "socials" },
+  { label: "Home", icon: HouseIcon, screen: SCREENS.HOME },
+  { label: "Search", icon: MagnifyingGlassIcon, screen: SCREENS.SEARCH },
+  { label: "Genres", icon: MusicNotesIcon, screen: SCREENS.GENRES },
+  { label: "Favorites", icon: HeartIcon, screen: SCREENS.FAVORITES },
+  { label: "Taste Profile", icon: ChartBarIcon, screen: SCREENS.TASTE_PROFILE },
+  { label: "Collections", icon: StackIcon, screen: SCREENS.COLLECTIONS },
+  { label: "Socials", icon: UsersThreeIcon, screen: SCREENS.SOCIALS },
 ];
 
 function Sidebar({ isOpen, onToggle, currentScreen, onNavigate, currentSong }) {
