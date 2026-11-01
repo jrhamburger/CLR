@@ -1,11 +1,15 @@
 import { getUserTracks } from "../../../Express-backend/src/api/library";
 import { supabase } from "../lib/supabase";
 import { useState, useEffect } from "react";
+import { motion } from "framer-motion";
+
+import "../styles/Home.css";
 
 function Home({ session, onStartQueue }) {
   const [username, setUsername] = useState("");
   const [tracks, setTracks] = useState([]);
   const [trackMessage, setTrackMessage] = useState("");
+  const [rotations, setRotations] = useState({});
 
   //Fetching the Username from personal.users.username
   useEffect(() => {
@@ -45,17 +49,49 @@ function Home({ session, onStartQueue }) {
           <p>You have not uploaded any tracks yet.</p>
         )}
 
-        {tracks.map((track, index) => (
-          <button
-            className="track-card" 
-            key={track.id}
-            type="button"
-            onClick={() => onStartQueue(tracks, index)}
-          >
-            <p>{track.title}</p>
-            <p>{track.artists}</p>
-          </button>
-        ))}
+        <section className="track-grid">
+          {tracks.map((track, index) => (
+            <motion.button
+              className="track-card"
+              key={track.id}
+              type="button"
+              initial={{ opacity: 0, y: 30 }}
+              animate={{
+                opacity: 1,
+                y: 0,
+                rotateY: rotations[track.id] || 0,
+              }}
+              transition={{
+                type: "spring",
+                stiffness: 100,
+                damping: 15,
+              }}
+              whileHover={{
+                y: -10,
+                scale: 1.04,
+                rotateY: 360,
+              }}
+              whileTap={{
+                scale: 0.95,
+                y: 4,
+                transition: {
+                  type: "spring",
+                  duration: 0.1,
+                  bounce: 0,
+                },
+              }}
+              onClick={() => onStartQueue(tracks, index)}
+            >
+              <img
+                src={track.coverArtUrl}
+                alt={`${track.title} cover art`}
+                className="user-track-cover"
+              />
+              <p>{track.title}</p>
+              <p>{track.artists}</p>
+            </motion.button>
+          ))}
+        </section>
 
         {trackMessage && <p>{trackMessage}</p>}
       </section>

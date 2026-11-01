@@ -124,8 +124,8 @@ function App() {
     setPlayPosition(startingIndex);
   }
 
+  // TODO: Fix this function
   function handleNextTrack() {
-    if (!audioRef.current || !currentSong) return;
 
     if (playPosition < playOrder.length - 1) {
       setPlayPosition((position) => position + 1);
@@ -135,15 +135,14 @@ function App() {
   }
 
   function handlePreviousTrack() {
-    if (!audioRef.current || !currentSong) return;
-
-    if (audioRef.current.currentTime < 1 && playPosition > 0) {
-      setPlayPosition((position) => position - 1);
-    } else {
-      audioRef.current.currentTime = 0;
-      setCurrentTime(0);
-    }
+    setPlayPosition((currentPosition) => {
+      if (currentPosition === 0) {
+        return 0;
+      }
+      return currentPosition - 1;
+    });
   }
+
 
   function handleToggleShuffle() {
     if (!currentSong) return;
@@ -247,7 +246,7 @@ function App() {
 
         {currentScreen === SCREENS.HOME && <Home session={session} onStartQueue={startQueue} />}
         {currentScreen === SCREENS.PLAYLISTS && <Playlists session={session} />}
-        {currentScreen === SCREENS.SEARCH && <Search />}
+        {currentScreen === SCREENS.SEARCH && <Search session={session} onStartQueue={startQueue} />}
         {currentScreen === SCREENS.GENRES && <Genres />}
         {currentScreen === SCREENS.FAVORITES && <Favorites />}
         {currentScreen === SCREENS.TASTE_PROFILE && <TasteProfile />}
@@ -257,7 +256,7 @@ function App() {
           <NowPlaying currentSong={currentSong} upNext={upNext} />
         )}
 
-        {currentScreen === SCREENS.PLAYER &&
+        {currentScreen === SCREENS.PLAYER && (
           <MusicPlayer
             currentQueue={currentQueue}
             playOrder={playOrder}

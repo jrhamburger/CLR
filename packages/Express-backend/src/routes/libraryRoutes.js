@@ -30,7 +30,7 @@ router.get("/tracks", requireAuth, async (req, res) => {
   try {
     const tracksWithAudioUrls = await Promise.all(
       tracks.map(async (track) => {
-        const { data: signedUrlData, signedUrlError } =
+        const { data: signedUrlData, error: signedUrlError } =
           await supabase.storage
             .from("audio-files")
             .createSignedUrl(track.audio_path, 60 * 60);
@@ -39,17 +39,39 @@ router.get("/tracks", requireAuth, async (req, res) => {
           throw signedUrlError;
         }
 
+        let coverArtUrl = null;
+
+        if (track.cover_art_url) {
+          const { data: coverArtData, error: coverArtError } =
+            await supabase.storage
+              .from("cover-art")
+              .createSignedUrl(track.cover_art_url, 60 * 60);
+
+          if (coverArtError) {
+            console.error(
+              `Could not create cover-art URL for ${track.id}:`,
+              coverArtError
+            );
+          } else {
+            coverArtUrl = coverArtData.signedUrl;
+          }
+        }
+
         return {
           ...track,
-          audioUrl: signedUrlData.signedUrl
+          audioUrl: signedUrlData.signedUrl,
+          coverArtUrl,
         };
       })
     );
 
     res.json(tracksWithAudioUrls);
   } catch (signedUrlError) {
-    console.error("could not create signed audio URLs:", signedUrlError);
-    
+    console.error(
+      "Could not create signed audio URLs:",
+      signedUrlError
+    );
+
     res.status(500).json({ error: signedUrlError.message });
   }
 });

@@ -1,6 +1,7 @@
 import { useState } from "react";
+import "../styles/Search.css";
 
-function Search() {
+function Search({ session, onStartQueue }) {
   const [searchText, setSearchText] = useState("");
   const [tracks, setTracks] = useState([]);
   const [isSearching, setIsSearching] = useState(false);
@@ -20,7 +21,12 @@ function Search() {
       setSearchError("");
 
       const response = await fetch(
-        `/api/catalog/search?q=${encodeURIComponent(query)}`
+        `/api/catalog/search?q=${encodeURIComponent(query)}`,
+        {
+          headers: {
+            Authorization: `Bearer ${session.access_token}`,
+          },
+        }
       );
 
       if (!response.ok) {
@@ -28,6 +34,17 @@ function Search() {
       }
 
       const data = await response.json();
+
+      console.table(
+        data.tracks.map((track) => ({
+          id: track.id,
+          recordingMbid: track.recordingMbid,
+          title: track.title,
+          artist: track.artist,
+          coverArtUrl: track.coverArtUrl,
+        }))
+      );
+
       setTracks(data.tracks);
     } catch (error) {
       console.error(error);
@@ -59,9 +76,28 @@ function Search() {
         {searchError && <p>{searchError}</p>}
 
         <ul>
-          {tracks.map((track) => (
-            <li key={track.recordingMbid}>
-              {track.title} — {track.artist}
+          {tracks.map((track, index) => (
+            <li key={track.id ?? track.recordingMbid}>
+              <button 
+                className="search-result-card"
+                type="button"
+                disabled={!track.audioUrl}
+                onClick={() => {
+                  if (track.audioUrl) {
+                    onStartQueue([track], 0);
+                  }
+                }}
+              >
+                <div className="search-result-cover-frame">
+                  <img
+                  src={track.coverArtUrl}
+                  alt={`${track.title} cover art`}
+                  className="search-result-cover"
+                />
+                </div>
+                
+                {track.title} — {track.artist}
+              </button>
             </li>
           ))}
         </ul>
