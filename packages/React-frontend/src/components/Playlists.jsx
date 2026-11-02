@@ -74,7 +74,7 @@ async function handleDelete(playlist) {
     <div>
       <h2>Your playlists</h2>
 
-      <form onSubmit={handleCreate}>
+      <form className="playlist-create" onSubmit={handleCreate}>
         <input
           type="text"
           placeholder="New playlist name"

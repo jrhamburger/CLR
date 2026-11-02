@@ -1,3 +1,64 @@
+/* Pill input + button, matching the top nav buttons */
+.playlist-create {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-top: 16px;
+}
+
+.playlist-create input {
+    width: min(100%, 320px);
+    padding: 8px 18px;
+
+    border: 1px solid var(--nav-outline, var(--border));
+    border-radius: 999px;
+    background: transparent;
+    color: var(--text-h);
+
+    font-family: "SF Pro Display", Arial, sans-serif;
+    font-size: 14px;
+    letter-spacing: 0.3px;
+
+    outline: none;
+    transition: border-color 0.15s ease, background 0.15s ease;
+}
+
+.playlist-create input::placeholder {
+    color: var(--text);
+}
+
+.playlist-create input:hover {
+    border-color: var(--text-h);
+}
+
+.playlist-create input:focus {
+    border-color: var(--accent);
+    background: var(--accent-bg);
+}
+
+.playlist-create button {
+    padding: 8px 18px;
+
+    border: 1px solid var(--nav-outline, var(--border));
+    border-radius: 999px;
+    background: transparent;
+    color: var(--text-h);
+
+    font-family: "SF Pro Display", Arial, sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+    letter-spacing: 0.3px;
+
+    cursor: pointer;
+    transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+}
+
+.playlist-create button:hover {
+    border-color: var(--accent);
+    background: var(--accent-bg);
+    color: var(--accent);
+}
+
 /* Fills left to right, then wraps to the next row */
 .playlist-grid {
     display: grid;
