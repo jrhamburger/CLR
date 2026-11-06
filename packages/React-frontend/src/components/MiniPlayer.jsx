@@ -1,9 +1,12 @@
 import { motion } from "framer-motion";
 import { useRef, useState, useEffect } from "react";
+import { recordHistory } from "../lib/recordHistory.js";
+
 import MusicControls from "./MusicControls";
 
 function MiniPlayer({ queue, modes, controls }) {
   const audioRef = useRef(null);
+  const hasRecordedCurrentTrack = useRef(false);
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
@@ -25,6 +28,10 @@ function MiniPlayer({ queue, modes, controls }) {
 
   const currentTrackIndex = playOrder[playPosition];
   const currentSong = currentQueue[currentTrackIndex];
+
+  useEffect(() => {
+    hasRecordedCurrentTrack.current = false;
+  }, [currentSong?.id]);
 
   useEffect(() => {
     if (!currentSong || !audioRef.current) return;
@@ -108,6 +115,36 @@ function MiniPlayer({ queue, modes, controls }) {
     toggleRepeat();
   }
 
+  // Handles recording the current track to the history if enough meeaningful data has
+  // been recorded
+  async function handleTimeUpdate() {
+    if (!audioRef.current || !currentSong) return;
+
+    const playbackTime = audioRef.current.currentTime;
+
+    setCurrentTime(playbackTime);
+
+    const hasPlayedEnough = playbackTime >= 30;
+
+    if (!hasPlayedEnough || hasRecordedCurrentTrack.current) {
+      return;
+    }
+
+    hasRecordedCurrentTrack.current = true;
+
+    try {
+      await recordHistory(currentSong.id);
+    } catch (error) {
+      console.error(
+        "Could not record listening history:",
+        error
+      );
+
+      // Allows another attempt if the database request failed.
+      hasRecordedCurrentTrack.current = false;
+    }
+  }
+
   function onEnded() {
     if (!audioRef.current || !currentSong) return;
     nextTrack();
@@ -123,9 +160,7 @@ function MiniPlayer({ queue, modes, controls }) {
             onPlay={() => setIsPlaying(true)}
             onPause={() => setIsPlaying(false)}
             onEnded={() => onEnded()}
-            onTimeUpdate={() =>
-              setCurrentTime(audioRef.current.currentTime)
-            }
+            onTimeUpdate={handleTimeUpdate}
             onLoadedMetadata={() =>
               setDuration(audioRef.current.duration)
             }
