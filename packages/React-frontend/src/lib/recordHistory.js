@@ -8,7 +8,7 @@ export async function recordHistory(userId, trackId) {
             track_id: trackId,
             played_at: new Date().toISOString(),
         });
-
+        
     if (error) {
         throw new Error(`Could not record listening history: ${error.message}`);
     }

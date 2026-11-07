@@ -9,7 +9,7 @@ export async function getCollectionsForUser(userId) {
 }
 
 async function getRecentlyAdded(userId) {
-    const recentTracks = await getRecentlyPlayedTracks(userId, limit = 50);
+    const recentTracks = await getRecentlyPlayedTracks(userId, 50);
 
     const scoredTracks = recentTracks.map((track) => ({
         track,
@@ -23,5 +23,6 @@ async function getRecentlyAdded(userId) {
         .map(({ track }) => track);
 }
 
-function getRecentlyPlayedTracks(userId,)
+// function getRecentlyPlayedTracks(userId,)
+
 

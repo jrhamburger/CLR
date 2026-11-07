@@ -4,7 +4,7 @@ import { recordHistory } from "../lib/recordHistory.js";
 
 import MusicControls from "./MusicControls";
 
-function MiniPlayer({ queue, modes, controls }) {
+function MiniPlayer({ queue, modes, controls, user }) {
   const audioRef = useRef(null);
   const hasRecordedCurrentTrack = useRef(false);
   const [isPlaying, setIsPlaying] = useState(false);
@@ -30,6 +30,7 @@ function MiniPlayer({ queue, modes, controls }) {
   const currentSong = currentQueue[currentTrackIndex];
 
   useEffect(() => {
+
     hasRecordedCurrentTrack.current = false;
   }, [currentSong?.id]);
 
@@ -133,7 +134,7 @@ function MiniPlayer({ queue, modes, controls }) {
     hasRecordedCurrentTrack.current = true;
 
     try {
-      await recordHistory(currentSong.id);
+      await recordHistory(user.id, currentSong.id);
     } catch (error) {
       console.error(
         "Could not record listening history:",

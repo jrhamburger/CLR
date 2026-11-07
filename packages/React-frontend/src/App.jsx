@@ -282,6 +282,7 @@ function App() {
           queue={queue}
           modes={modes}
           controls={controls}
+          user={session?.user}
         />
       )}
 
