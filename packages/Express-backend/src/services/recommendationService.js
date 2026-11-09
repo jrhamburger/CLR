@@ -1,3 +1,5 @@
+import { supabase } from "../lib/supabase.js";
+
 export async function getCollectionsForUser(userId) {
     const recentlyAdded = await getRecentlyAdded(userId);
     const moreFromArtistsYouLike = await getTracksFromSavedArtists(userId);
@@ -22,7 +24,5 @@ async function getRecentlyAdded(userId) {
         .slice(0, 12)
         .map(({ track }) => track);
 }
-
-// function getRecentlyPlayedTracks(userId,)
 
 

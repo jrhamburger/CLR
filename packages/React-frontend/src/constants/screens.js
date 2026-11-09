@@ -13,6 +13,7 @@ export const SCREENS = Object.freeze({
   TASTE_PROFILE: "taste-profile",
   COLLECTIONS: "collections",
   SOCIALS: "socials",
+  HISTORY: "history"
 });
 
 const VALID_SCREENS = Object.values(SCREENS);

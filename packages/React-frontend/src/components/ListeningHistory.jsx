@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
-import { fetchListeningHistory } from "../services/listeningHistoryApi.js";
+import { fetchListeningHistory } from "../lib/listeningHistoryApi.js";
 
-function ListeningHistory({ onTrackClick }) {
+function ListeningHistory({ onTrackClick, user }) {
     const [history, setHistory] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState("");
@@ -13,7 +13,8 @@ function ListeningHistory({ onTrackClick }) {
     async function loadListeningHistory() {
         try {
             setIsLoading(true);
-            const historyItems = await fetchListeningHistory();
+            const historyItems = await fetchListeningHistory(user.id);
+            console.log(historyItems);
             setHistory(historyItems);
         } catch (error) {
             setError("Could not load listening history.");
@@ -22,8 +23,8 @@ function ListeningHistory({ onTrackClick }) {
         }
     }
 
-    function handleTrackClick(track) {
-        onTrackClick(track);
+    function handleTrackClick(index) {
+        onTrackClick(history, index);
     }
 
     if (isLoading) return <p>Loading history...</p>;
@@ -31,14 +32,14 @@ function ListeningHistory({ onTrackClick }) {
 
     return (
       <section>
-        <h1>Listening History</h1>
+        <h2>Listening History</h2>
 
-        {history.map((item) => (
+        {history.map((track, index) => (
           <button
-            key={item.history_id}
-            onClick={() => handleTrackClick(item.track)}
+            key={`${track.id}-${track.playedAt}`}
+            onClick={() => handleTrackClick(index)}
           >
-            {item.track.title} — {item.track.artist}
+            {track.title} — {track.artist}
           </button>
         ))}
       </section>

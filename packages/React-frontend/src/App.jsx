@@ -20,6 +20,7 @@ import Collections from "./components/Collections";
 import Socials from "./components/Socials";
 import NowPlaying from "./components/NowPlaying";
 import NowPlayingPanel from "./components/NowPlayingPanel";
+import ListeningHistory from "./components/ListeningHistory";
 import "./styles/TopNav.css";
 
 const TOP_NAV_ITEMS = [
@@ -27,6 +28,7 @@ const TOP_NAV_ITEMS = [
   { label: "Playlists", screen: SCREENS.PLAYLISTS },
   { label: "Player", screen: SCREENS.PLAYER },
   { label: "Now Playing", screen: SCREENS.NOW_PLAYING },
+  { label: "History", screen: SCREENS.HISTORY },
 ];
 
 function App() {
@@ -51,6 +53,7 @@ function App() {
   const [uploadProgress, setUploadProgress] = useState(null); // { done, total } while uploading
   const [panelMode, setPanelMode] = useState("open"); // right column: "open" | "mini" | "hidden"
 
+  const currentTrackIndex = playOrder[playPosition];
   const currentSong = currentQueue[playOrder[playPosition]];
   const upNext = playOrder
     .slice(playPosition + 1)
@@ -255,6 +258,7 @@ function App() {
         {currentScreen === SCREENS.NOW_PLAYING && (
           <NowPlaying currentSong={currentSong} upNext={upNext} />
         )}
+        {currentScreen === SCREENS.HISTORY && <ListeningHistory onTrackClick={startQueue} user={session?.user} /> }
 
         {currentScreen === SCREENS.PLAYER && (
           <MusicPlayer

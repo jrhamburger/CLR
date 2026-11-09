@@ -10,6 +10,7 @@ function Home({ session, onStartQueue }) {
   const [tracks, setTracks] = useState([]);
   const [trackMessage, setTrackMessage] = useState("");
   const [rotations, setRotations] = useState({});
+  const [isLoading, setIsLoading] = useState(true);
 
   //Fetching the Username from personal.users.username
   useEffect(() => {
@@ -29,8 +30,11 @@ function Home({ session, onStartQueue }) {
           session.access_token
         );
         setTracks(userTracks);
+        setIsLoading(false);
       } catch (error) {
         setTrackMessage(error.message);
+      } finally {
+        setIsLoading(false);
       }
     }
 
@@ -45,53 +49,54 @@ function Home({ session, onStartQueue }) {
       <section>
         <h3>Your Music</h3>
 
-        {tracks.length === 0 && (
-          <p>You have not uploaded any tracks yet.</p>
-        )}
-
-        <section className="track-grid">
-          {tracks.map((track, index) => (
-            <motion.button
-              className="track-card"
-              key={track.id}
-              type="button"
-              initial={{ opacity: 0, y: 30 }}
-              animate={{
-                opacity: 1,
-                y: 0,
-                rotateY: rotations[track.id] || 0,
-              }}
-              transition={{
-                type: "spring",
-                stiffness: 100,
-                damping: 15,
-              }}
-              whileHover={{
-                y: -10,
-                scale: 1.04,
-                rotateY: 360,
-              }}
-              whileTap={{
-                scale: 0.95,
-                y: 4,
-                transition: {
+        {isLoading ? (
+          <p>Loading tracks...</p>
+        ) : tracks.length === 0 ? (
+          <p>You have not uploaded any tracks</p>
+        ) : (
+          <section className="track-grid">
+            {tracks.map((track, index) => (
+              <motion.button
+                className="track-card"
+                key={track.id}
+                type="button"
+                initial={{ opacity: 0, y: 30 }}
+                animate={{
+                  opacity: 1,
+                  y: 0,
+                  rotateY: rotations[track.id] || 0
+                }}
+                transition={{
                   type: "spring",
-                  duration: 0.1,
-                  bounce: 0,
-                },
-              }}
-              onClick={() => onStartQueue(tracks, index)}
-            >
-              <img
-                src={track.coverArtUrl}
-                alt={`${track.title} cover art`}
-                className="user-track-cover"
-              />
-              <p>{track.title}</p>
-              <p>{track.artists}</p>
-            </motion.button>
-          ))}
-        </section>
+                  stiffness: 100,
+                  damping: 15
+                }}
+                whileHover={{
+                  y: -10,
+                  scale: 1.04,
+                  rotateY: 360
+                }}
+                whileTap={{
+                  scale: 0.95,
+                  y: 4,
+                  transition: {
+                    type: "spring",
+                    duration: 0.1,
+                    bounce: 0
+                  }
+                }}
+                onClick={() => onStartQueue(tracks, index)}>
+                <img
+                  src={track.coverArtUrl}
+                  alt={`${track.title} cover art`}
+                  className="user-track-cover"
+                />
+                <p>{track.title}</p>
+                <p>{track.artists}</p>
+              </motion.button>
+            ))}
+          </section>
+        )}
 
         {trackMessage && <p>{trackMessage}</p>}
       </section>
