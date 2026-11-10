@@ -1,45 +1,21 @@
 import { useState, useEffect } from "react";
 import { supabase } from "../lib/supabase";
+import {
+  fetchIncoming,
+  fetchFriends,
+  fetchBlocked,
+  searchUsers,
+  fetchSharedWithMe,
+  saveToLibrary,
+  dismissShare
+} from "../lib/socials";
 import Avatar from "./Avatar";
 import "../styles/Socials.css";
 
 const SEARCH_DELAY_MS = 300;
 
-function fetchIncoming(userId) {
-  return supabase
-    .from("friend")
-    .select(
-      "user_id, created_at, users!friend_user_id_fkey(user_name)"
-    )
-    .eq("friend_id", userId)
-    .eq("status", "pending");
-}
-
-function fetchFriends(userId) {
-  return supabase
-    .from("friend")
-    .select("friend_id, users!friend_friend_id_fkey(user_name)")
-    .eq("user_id", userId)
-    .eq("status", "accepted");
-}
-
-function fetchBlocked(userId) {
-  return supabase
-    .from("blocked")
-    .select(
-      "blocked_id, users!blocked_blocked_id_fkey(user_name)"
-    )
-    .eq("user_id", userId);
-}
-
-function searchUsers(query, userId) {
-  return supabase
-    .from("users")
-    .select("user_id, user_name")
-    .ilike("user_name", `%${query}%`)
-    .neq("user_id", userId)
-    .limit(10);
-}
+// Postgres unique-violation code, e.g. a track already in user_tracks
+const DUPLICATE_KEY = "23505";
 
 function SectionHeading({ title, count, attention }) {
   return (
@@ -66,6 +42,7 @@ function Socials({ session: sessionProp }) {
   const [incoming, setIncoming] = useState([]);
   const [friends, setFriends] = useState([]);
   const [blocked, setBlocked] = useState([]);
+  const [shared, setShared] = useState([]);
   const [message, setMessage] = useState("");
 
   const session = sessionProp ?? fetchedSession;
@@ -83,6 +60,7 @@ function Socials({ session: sessionProp }) {
     loadIncoming();
     loadFriends();
     loadBlocked();
+    loadShared();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [userId]);
 
@@ -136,6 +114,44 @@ function Socials({ session: sessionProp }) {
     const { data, error } = await fetchBlocked(userId);
     if (error) setMessage(error.message);
     else setBlocked(data);
+  }
+
+  async function loadShared() {
+    const { data, error } = await fetchSharedWithMe(userId);
+    if (error) setMessage(error.message);
+    else setShared(data);
+  }
+
+  async function handleSave(share) {
+    const { error } = await saveToLibrary(
+      userId,
+      share.tracks.id
+    );
+
+    if (error?.code === DUPLICATE_KEY) {
+      setMessage(`"${share.tracks.title}" is already saved.`);
+      return;
+    }
+    if (error) {
+      setMessage(error.message);
+      return;
+    }
+
+    setMessage(
+      `Saved "${share.tracks.title}" to your library.`
+    );
+  }
+
+  async function handleDismiss(shareId) {
+    const { error } = await dismissShare(shareId);
+
+    if (error) {
+      setMessage(error.message);
+      return;
+    }
+
+    setMessage("");
+    loadShared();
   }
 
   async function handleAdd(user) {
@@ -332,6 +348,58 @@ function Socials({ session: sessionProp }) {
                   className="socials-button"
                   onClick={() => handleDeny(request.user_id)}>
                   Deny
+                </button>
+              </div>
+            </li>
+          ))}
+        </ul>
+      </section>
+
+      <section className="socials-section">
+        <SectionHeading
+          title="Shared with you"
+          count={shared.length}
+        />
+
+        {shared.length === 0 && (
+          <p className="socials-empty">
+            Nothing shared with you yet
+          </p>
+        )}
+
+        <ul className="socials-list">
+          {shared.map((share) => (
+            <li
+              className="socials-card socials-card--share"
+              key={share.id}>
+              <Avatar
+                userName={share.users?.user_name}
+                userId={share.from_user}
+              />
+              <div className="socials-name share-details">
+                <span>
+                  <strong>{share.users?.user_name}</strong>{" "}
+                  shared {share.tracks?.title}
+                  {share.tracks?.artists &&
+                    ` — ${share.tracks.artists}`}
+                </span>
+                {share.note && (
+                  <span className="share-note-text">
+                    "{share.note}"
+                  </span>
+                )}
+              </div>
+              <div className="socials-actions">
+                <button
+                  className="socials-button socials-button--primary"
+                  onClick={() => handleSave(share)}
+                  disabled={!share.tracks}>
+                  Save to library
+                </button>
+                <button
+                  className="socials-button"
+                  onClick={() => handleDismiss(share.id)}>
+                  Dismiss
                 </button>
               </div>
             </li>
