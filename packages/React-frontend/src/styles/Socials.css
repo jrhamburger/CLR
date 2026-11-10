@@ -252,3 +252,128 @@
   opacity: 0.5;
   cursor: not-allowed;
 }
+
+.socials-tabs {
+  display: flex;
+  gap: 8px;
+}
+
+.socials-tab {
+  padding: 8px 18px;
+
+  border: 1px solid var(--nav-outline, var(--border));
+  border-radius: 999px;
+  background: transparent;
+  color: var(--text-h);
+
+  font-family: "SF Pro Display", Arial, sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  letter-spacing: 0.3px;
+
+  cursor: pointer;
+  transition:
+    background 0.15s ease,
+    border-color 0.15s ease,
+    color 0.15s ease;
+}
+
+.socials-tab:hover,
+.socials-tab--active {
+  border-color: var(--accent);
+  background: var(--accent-bg);
+  color: var(--accent);
+}
+
+/* Whole row opens the conversation */
+.chat-row {
+  width: 100%;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: border-color 0.15s ease;
+}
+
+.chat-row:hover {
+  border-color: var(--accent-border);
+}
+
+.chat-preview {
+  overflow: hidden;
+  color: var(--text);
+  font-size: 13px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.chat {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.chat-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.chat-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.chat-messages {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  height: 50vh;
+  min-height: 240px;
+  padding: 12px;
+  overflow-y: auto;
+
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--code-bg);
+}
+
+.chat-bubble {
+  display: flex;
+  flex-direction: column;
+  align-self: flex-start;
+  max-width: 75%;
+  padding: 8px 12px;
+
+  border: 1px solid var(--border);
+  border-radius: 14px 14px 14px 4px;
+  background: var(--bg);
+  color: var(--text-h);
+
+  font-size: 15px;
+  overflow-wrap: anywhere;
+}
+
+.chat-bubble--mine {
+  align-self: flex-end;
+  border-color: var(--accent-border);
+  border-radius: 14px 14px 4px 14px;
+  background: var(--accent-bg);
+}
+
+.chat-time {
+  align-self: flex-end;
+  color: var(--text);
+  font-size: 11px;
+}
+
+.chat-compose {
+  display: flex;
+  gap: 8px;
+}
+
+.chat-input {
+  flex: 1;
+  width: auto;
+  margin-bottom: 0;
+}

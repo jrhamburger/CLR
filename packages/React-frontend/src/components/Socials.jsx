@@ -10,6 +10,7 @@ import {
   dismissShare
 } from "../lib/socials";
 import Avatar from "./Avatar";
+import Chats from "./Chats";
 import "../styles/Socials.css";
 
 const SEARCH_DELAY_MS = 300;
@@ -44,6 +45,7 @@ function Socials({ session: sessionProp }) {
   const [blocked, setBlocked] = useState([]);
   const [shared, setShared] = useState([]);
   const [message, setMessage] = useState("");
+  const [tab, setTab] = useState("friends");
 
   const session = sessionProp ?? fetchedSession;
   const userId = session?.user.id;
@@ -263,224 +265,266 @@ function Socials({ session: sessionProp }) {
     <div className="socials">
       <h2>Socials</h2>
 
+      <div className="socials-tabs" role="tablist">
+        {[
+          ["friends", "Friends"],
+          ["chats", "Chats"]
+        ].map(([value, label]) => (
+          <button
+            key={value}
+            role="tab"
+            aria-selected={tab === value}
+            className={
+              tab === value
+                ? "socials-tab socials-tab--active"
+                : "socials-tab"
+            }
+            onClick={() => setTab(value)}>
+            {label}
+          </button>
+        ))}
+      </div>
+
       {message && <p className="socials-message">{message}</p>}
 
-      <section className="socials-section">
-        <h2 className="socials-heading">Find people</h2>
-        <input
-          className="socials-search"
-          type="text"
-          placeholder="Search by username"
-          value={query}
-          onChange={(event) =>
-            handleQueryChange(event.target.value)
-          }
-        />
+      {tab === "chats" ? (
+        <Chats userId={userId} friends={friends} />
+      ) : (
+        <>
+          <section className="socials-section">
+            <h2 className="socials-heading">Find people</h2>
+            <input
+              className="socials-search"
+              type="text"
+              placeholder="Search by username"
+              value={query}
+              onChange={(event) =>
+                handleQueryChange(event.target.value)
+              }
+            />
 
-        {searching && (
-          <p className="socials-empty">Searching…</p>
-        )}
+            {searching && (
+              <p className="socials-empty">Searching…</p>
+            )}
 
-        {!searching && query.trim() && results.length === 0 && (
-          <p className="socials-empty">
-            No users match "{query.trim()}"
-          </p>
-        )}
+            {!searching &&
+              query.trim() &&
+              results.length === 0 && (
+                <p className="socials-empty">
+                  No users match "{query.trim()}"
+                </p>
+              )}
 
-        {!searching && results.length > 0 && (
-          <ul className="socials-list">
-            {results.map((user) => (
-              <li className="socials-card" key={user.user_id}>
-                <Avatar
-                  userName={user.user_name}
-                  userId={user.user_id}
-                />
-                <span className="socials-name">
-                  {user.user_name}
-                </span>
-                <div className="socials-actions">
-                  <button
-                    className="socials-button socials-button--primary"
-                    onClick={() => handleAdd(user)}>
-                    Add friend
-                  </button>
-                </div>
-              </li>
-            ))}
-          </ul>
-        )}
-      </section>
+            {!searching && results.length > 0 && (
+              <ul className="socials-list">
+                {results.map((user) => (
+                  <li
+                    className="socials-card"
+                    key={user.user_id}>
+                    <Avatar
+                      userName={user.user_name}
+                      userId={user.user_id}
+                    />
+                    <span className="socials-name">
+                      {user.user_name}
+                    </span>
+                    <div className="socials-actions">
+                      <button
+                        className="socials-button socials-button--primary"
+                        onClick={() => handleAdd(user)}>
+                        Add friend
+                      </button>
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </section>
 
-      <section
-        className={
-          incoming.length > 0
-            ? "socials-section socials-section--attention"
-            : "socials-section"
-        }>
-        <SectionHeading
-          title="Requests"
-          count={incoming.length}
-          attention={incoming.length > 0}
-        />
+          <section
+            className={
+              incoming.length > 0
+                ? "socials-section socials-section--attention"
+                : "socials-section"
+            }>
+            <SectionHeading
+              title="Requests"
+              count={incoming.length}
+              attention={incoming.length > 0}
+            />
 
-        {incoming.length === 0 && (
-          <p className="socials-empty">No pending requests</p>
-        )}
+            {incoming.length === 0 && (
+              <p className="socials-empty">
+                No pending requests
+              </p>
+            )}
 
-        <ul className="socials-list">
-          {incoming.map((request) => (
-            <li className="socials-card" key={request.user_id}>
-              <Avatar
-                userName={request.users?.user_name}
-                userId={request.user_id}
-              />
-              <span className="socials-name">
-                <strong>{request.users?.user_name}</strong>{" "}
-                wants to connect
-              </span>
-              <div className="socials-actions">
-                <button
-                  className="socials-button socials-button--primary"
-                  onClick={() => handleAccept(request.user_id)}>
-                  Accept
-                </button>
-                <button
-                  className="socials-button"
-                  onClick={() => handleDeny(request.user_id)}>
-                  Deny
-                </button>
-              </div>
-            </li>
-          ))}
-        </ul>
-      </section>
-
-      <section className="socials-section">
-        <SectionHeading
-          title="Shared with you"
-          count={shared.length}
-        />
-
-        {shared.length === 0 && (
-          <p className="socials-empty">
-            Nothing shared with you yet
-          </p>
-        )}
-
-        <ul className="socials-list">
-          {shared.map((share) => (
-            <li
-              className="socials-card socials-card--share"
-              key={share.id}>
-              <Avatar
-                userName={share.users?.user_name}
-                userId={share.from_user}
-              />
-              <div className="socials-name share-details">
-                <span>
-                  <strong>{share.users?.user_name}</strong>{" "}
-                  shared {share.tracks?.title}
-                  {share.tracks?.artists &&
-                    ` — ${share.tracks.artists}`}
-                </span>
-                {share.note && (
-                  <span className="share-note-text">
-                    "{share.note}"
+            <ul className="socials-list">
+              {incoming.map((request) => (
+                <li
+                  className="socials-card"
+                  key={request.user_id}>
+                  <Avatar
+                    userName={request.users?.user_name}
+                    userId={request.user_id}
+                  />
+                  <span className="socials-name">
+                    <strong>{request.users?.user_name}</strong>{" "}
+                    wants to connect
                   </span>
-                )}
-              </div>
-              <div className="socials-actions">
-                <button
-                  className="socials-button socials-button--primary"
-                  onClick={() => handleSave(share)}
-                  disabled={!share.tracks}>
-                  Save to library
-                </button>
-                <button
-                  className="socials-button"
-                  onClick={() => handleDismiss(share.id)}>
-                  Dismiss
-                </button>
-              </div>
-            </li>
-          ))}
-        </ul>
-      </section>
+                  <div className="socials-actions">
+                    <button
+                      className="socials-button socials-button--primary"
+                      onClick={() =>
+                        handleAccept(request.user_id)
+                      }>
+                      Accept
+                    </button>
+                    <button
+                      className="socials-button"
+                      onClick={() =>
+                        handleDeny(request.user_id)
+                      }>
+                      Deny
+                    </button>
+                  </div>
+                </li>
+              ))}
+            </ul>
+          </section>
 
-      <section className="socials-section">
-        <SectionHeading
-          title="Friends"
-          count={friends.length}
-        />
+          <section className="socials-section">
+            <SectionHeading
+              title="Shared with you"
+              count={shared.length}
+            />
 
-        {friends.length === 0 && (
-          <p className="socials-empty">
-            No friends yet — search for someone above
-          </p>
-        )}
+            {shared.length === 0 && (
+              <p className="socials-empty">
+                Nothing shared with you yet
+              </p>
+            )}
 
-        <ul className="socials-list">
-          {friends.map((friend) => (
-            <li className="socials-card" key={friend.friend_id}>
-              <Avatar
-                userName={friend.users?.user_name}
-                userId={friend.friend_id}
-              />
-              <span className="socials-name">
-                {friend.users?.user_name}
-              </span>
-              <div className="socials-actions">
-                <button
-                  className="socials-button"
-                  onClick={() => handleRemove(friend)}>
-                  Remove
-                </button>
-                <button
-                  className="socials-button socials-button--danger"
-                  onClick={() => handleBlock(friend)}>
-                  Block
-                </button>
-              </div>
-            </li>
-          ))}
-        </ul>
-      </section>
+            <ul className="socials-list">
+              {shared.map((share) => (
+                <li
+                  className="socials-card socials-card--share"
+                  key={share.id}>
+                  <Avatar
+                    userName={share.users?.user_name}
+                    userId={share.from_user}
+                  />
+                  <div className="socials-name share-details">
+                    <span>
+                      <strong>{share.users?.user_name}</strong>{" "}
+                      shared {share.tracks?.title}
+                      {share.tracks?.artists &&
+                        ` — ${share.tracks.artists}`}
+                    </span>
+                    {share.note && (
+                      <span className="share-note-text">
+                        "{share.note}"
+                      </span>
+                    )}
+                  </div>
+                  <div className="socials-actions">
+                    <button
+                      className="socials-button socials-button--primary"
+                      onClick={() => handleSave(share)}
+                      disabled={!share.tracks}>
+                      Save to library
+                    </button>
+                    <button
+                      className="socials-button"
+                      onClick={() => handleDismiss(share.id)}>
+                      Dismiss
+                    </button>
+                  </div>
+                </li>
+              ))}
+            </ul>
+          </section>
 
-      <section className="socials-section">
-        <SectionHeading
-          title="Blocked"
-          count={blocked.length}
-        />
+          <section className="socials-section">
+            <SectionHeading
+              title="Friends"
+              count={friends.length}
+            />
 
-        {blocked.length === 0 && (
-          <p className="socials-empty">
-            You haven't blocked anyone
-          </p>
-        )}
+            {friends.length === 0 && (
+              <p className="socials-empty">
+                No friends yet — search for someone above
+              </p>
+            )}
 
-        <ul className="socials-list">
-          {blocked.map((entry) => (
-            <li className="socials-card" key={entry.blocked_id}>
-              <Avatar
-                userName={entry.users?.user_name}
-                userId={entry.blocked_id}
-              />
-              <span className="socials-name">
-                {entry.users?.user_name}
-              </span>
-              <div className="socials-actions">
-                <button
-                  className="socials-button"
-                  onClick={() =>
-                    handleUnblock(entry.blocked_id)
-                  }>
-                  Unblock
-                </button>
-              </div>
-            </li>
-          ))}
-        </ul>
-      </section>
+            <ul className="socials-list">
+              {friends.map((friend) => (
+                <li
+                  className="socials-card"
+                  key={friend.friend_id}>
+                  <Avatar
+                    userName={friend.users?.user_name}
+                    userId={friend.friend_id}
+                  />
+                  <span className="socials-name">
+                    {friend.users?.user_name}
+                  </span>
+                  <div className="socials-actions">
+                    <button
+                      className="socials-button"
+                      onClick={() => handleRemove(friend)}>
+                      Remove
+                    </button>
+                    <button
+                      className="socials-button socials-button--danger"
+                      onClick={() => handleBlock(friend)}>
+                      Block
+                    </button>
+                  </div>
+                </li>
+              ))}
+            </ul>
+          </section>
+
+          <section className="socials-section">
+            <SectionHeading
+              title="Blocked"
+              count={blocked.length}
+            />
+
+            {blocked.length === 0 && (
+              <p className="socials-empty">
+                You haven't blocked anyone
+              </p>
+            )}
+
+            <ul className="socials-list">
+              {blocked.map((entry) => (
+                <li
+                  className="socials-card"
+                  key={entry.blocked_id}>
+                  <Avatar
+                    userName={entry.users?.user_name}
+                    userId={entry.blocked_id}
+                  />
+                  <span className="socials-name">
+                    {entry.users?.user_name}
+                  </span>
+                  <div className="socials-actions">
+                    <button
+                      className="socials-button"
+                      onClick={() =>
+                        handleUnblock(entry.blocked_id)
+                      }>
+                      Unblock
+                    </button>
+                  </div>
+                </li>
+              ))}
+            </ul>
+          </section>
+        </>
+      )}
     </div>
   );
 }

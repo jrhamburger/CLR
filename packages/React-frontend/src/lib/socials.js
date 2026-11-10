@@ -75,3 +75,57 @@ export function dismissShare(shareId) {
     .delete()
     .eq("id", shareId);
 }
+
+// Newest first, so the first hit per friend is their latest message
+export function fetchRecentMessages(userId) {
+  return supabase
+    .from("messages")
+    .select("id, from_user, to_user, body, created_at")
+    .or(`from_user.eq.${userId},to_user.eq.${userId}`)
+    .order("created_at", { ascending: false })
+    .limit(500);
+}
+
+export function fetchConversation(userId, friendId) {
+  return supabase
+    .from("messages")
+    .select("id, from_user, to_user, body, created_at")
+    .or(
+      `and(from_user.eq.${userId},to_user.eq.${friendId}),` +
+        `and(from_user.eq.${friendId},to_user.eq.${userId})`
+    )
+    .order("created_at", { ascending: true });
+}
+
+// RLS only accepts the insert when friendId is an accepted friend
+export function sendMessage(userId, friendId, body) {
+  return supabase
+    .from("messages")
+    .insert({ from_user: userId, to_user: friendId, body })
+    .select("id, from_user, to_user, body, created_at")
+    .single();
+}
+
+// Calls onMessage for each new message sent to userId; returns
+// an unsubscribe function
+export function subscribeToIncoming(
+  channelName,
+  userId,
+  onMessage
+) {
+  const channel = supabase
+    .channel(channelName)
+    .on(
+      "postgres_changes",
+      {
+        event: "INSERT",
+        schema: "public",
+        table: "messages",
+        filter: `to_user=eq.${userId}`
+      },
+      (payload) => onMessage(payload.new)
+    )
+    .subscribe();
+
+  return () => supabase.removeChannel(channel);
+}
