@@ -1,0 +1,184 @@
+.socials {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.socials-message {
+  padding: 10px 16px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--code-bg);
+  color: var(--text-h);
+  font-size: 14px;
+}
+
+.socials-section {
+  padding: 20px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+}
+
+/* Requests stand out while something is waiting on the user */
+.socials-section--attention {
+  border-color: var(--accent-border);
+  background: var(--accent-bg);
+}
+
+.socials-heading {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 18px;
+  margin-bottom: 12px;
+}
+
+.socials-count {
+  min-width: 24px;
+  padding: 2px 8px;
+  box-sizing: border-box;
+
+  border-radius: 999px;
+  background: var(--code-bg);
+  color: var(--text);
+
+  font-size: 13px;
+  font-weight: 600;
+  text-align: center;
+}
+
+.socials-count--attention {
+  background: var(--accent);
+  color: var(--bg);
+}
+
+.socials-empty {
+  color: var(--text);
+  font-size: 14px;
+}
+
+/* Same pill input as the playlist and search boxes */
+.socials-search {
+  width: min(100%, 320px);
+  margin-bottom: 12px;
+  padding: 8px 18px;
+  box-sizing: border-box;
+
+  border: 1px solid var(--nav-outline, var(--border));
+  border-radius: 999px;
+  background: transparent;
+  color: var(--text-h);
+
+  font-family: "SF Pro Display", Arial, sans-serif;
+  font-size: 14px;
+  letter-spacing: 0.3px;
+
+  outline: none;
+  transition:
+    border-color 0.15s ease,
+    background 0.15s ease;
+}
+
+.socials-search::placeholder {
+  color: var(--text);
+}
+
+.socials-search:hover {
+  border-color: var(--text-h);
+}
+
+.socials-search:focus {
+  border-color: var(--accent);
+  background: var(--accent-bg);
+}
+
+.socials-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.socials-card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 14px;
+
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--bg);
+}
+
+.socials-name {
+  flex: 1;
+  min-width: 0;
+  color: var(--text-h);
+  font-size: 15px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.socials-actions {
+  display: flex;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.socials-button {
+  padding: 6px 14px;
+
+  border: 1px solid var(--nav-outline, var(--border));
+  border-radius: 999px;
+  background: transparent;
+  color: var(--text-h);
+
+  font-family: "SF Pro Display", Arial, sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: 0.3px;
+
+  cursor: pointer;
+  transition:
+    background 0.15s ease,
+    border-color 0.15s ease,
+    color 0.15s ease;
+}
+
+.socials-button:hover {
+  border-color: var(--accent);
+  background: var(--accent-bg);
+  color: var(--accent);
+}
+
+.socials-button--primary {
+  border-color: var(--accent-border);
+  color: var(--accent);
+}
+
+/* Matches the playlist delete hover; there's no danger variable */
+.socials-button--danger:hover {
+  border-color: #e5484d;
+  background: transparent;
+  color: #e5484d;
+}
+
+/* Background colour is set inline by Avatar.jsx */
+.avatar {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 36px;
+  height: 36px;
+
+  border-radius: 50%;
+  color: #fff;
+
+  font-size: 15px;
+  font-weight: 600;
+  user-select: none;
+}
