@@ -7,7 +7,7 @@ function Collections() {
 
   useEffect(() => {
     loadCollections();
-  });
+  }, []);
 
   async function loadCollections() {
     try {
