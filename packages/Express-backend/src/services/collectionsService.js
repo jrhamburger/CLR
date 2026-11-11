@@ -6,6 +6,8 @@ export async function generateCollections(userId) {
     const trackScores = calculateTrackScores(listeningHistory);
     const topTracks = getTopTracks(trackScores, 10);
 
+    const artistDeepDiveCollection = createArtistDeepDiveCollection(trackScores);
+
     if (topTracks.length === 0) {
         return [];
     }
@@ -17,9 +19,13 @@ export async function generateCollections(userId) {
             description: "Your most-played songs lately",
             tracks: topTracks,
         },
-    ];
+        genreScores: calculateGenreScores(trackScores),
+        artistDeepDiveCollection,
+    ].filter(Boolean);
 }
 
+// Calculates track scores by how recently and repeatedly
+// they've been played.
 function calculateTrackScores(listeningHistory) {
     const scoresByTrackId = new Map();
 
@@ -62,4 +68,56 @@ function getTopTracks(trackScores, amount) {
         })
         .slice(0, amount)
         .map(({ track }) => track);
+}
+
+// Function for creating the collection based on the artist
+// that has been most listened to.
+function createArtistDeepDiveCollection(trackScores) {
+    const scoresByArtist = new Map();
+
+    for (const trackScore of trackScores) {
+        const artist = Array.isArray(trackScore.track.artists)
+            ? trackScore.track.artists.join(", ")
+            : trackScore.track.artists?.trim();
+
+        if (!artist) {
+            continue;
+        }
+
+        const currentArtistScore = scoresByArtist.get(artist) ?? {
+            artist,
+            score: 0,
+            trackScores: [],
+        };
+
+        currentArtistScore.score += trackScore.score;
+        currentArtistScore.trackScores.push(trackScore);
+
+        scoresByArtist.set(artist, currentArtistScore);
+    }
+
+    const topArtist = [...scoresByArtist.values()]
+        .filter((artistScore) => artistScore.trackScores.length >= 3)
+        .sort((first, second) => second.score - first.score)[0];
+
+    if (!topArtist) {
+        return null;
+    }
+
+    return {
+        id: `artist-deep-dive-${topArtist.artist}`,
+        title: `${topArtist.artist} Deep Dive`,
+        description: `Your most-played tracks from ${topArtist.artist}`,
+        tracks: getTopTracks(topArtist.trackScores, 10),
+    };
+}
+
+// Function for calculating the genre score for the types of
+// genres the listener likes most
+function calculateGenreScores(trackScores) {
+    const scoresByGenre = new Map();
+
+    for (const trackScore of trackScores) {
+        
+    }
 }
