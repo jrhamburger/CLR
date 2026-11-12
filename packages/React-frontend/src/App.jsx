@@ -253,7 +253,7 @@ function App() {
         {currentScreen === SCREENS.GENRES && <Genres />}
         {currentScreen === SCREENS.FAVORITES && <Favorites />}
         {currentScreen === SCREENS.TASTE_PROFILE && <TasteProfile />}
-        {currentScreen === SCREENS.COLLECTIONS && <Collections />}
+        {currentScreen === SCREENS.COLLECTIONS && <Collections onStartQueue={startQueue} />}
         {currentScreen === SCREENS.SOCIALS && <Socials />}
         {currentScreen === SCREENS.NOW_PLAYING && (
           <NowPlaying currentSong={currentSong} upNext={upNext} />

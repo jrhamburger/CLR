@@ -6,6 +6,16 @@ import {
 import QueueList, { SongCover } from "./QueueList";
 import "../styles/NowPlaying.css";
 
+function PanelVisualizer() {
+  return (
+    <div className="panel-visualizer" aria-label="Audio visualizer placeholder">
+      {Array.from({ length: 28 }, (_, index) => (
+        <span key={index} style={{ "--bar": (index % 7) + 1 }} />
+      ))}
+    </div>
+  );
+}
+
 // Right column. mode is "open" (full), "mini" (covers only) or "hidden"
 function NowPlayingPanel({ mode, onChangeMode, currentSong, upNext }) {
   return (
@@ -23,13 +33,37 @@ function NowPlayingPanel({ mode, onChangeMode, currentSong, upNext }) {
               </button>
             </div>
 
-            <SongCover song={currentSong} size={240} />
-            <p className="panel-song-title">
-              {currentSong?.title ?? "Nothing playing"}
-            </p>
+            <div className="panel-current-track">
+              <SongCover song={currentSong} size={76} />
+              <div>
+                <p className="panel-kicker">Listening now</p>
+                <p className="panel-song-title">
+                  {currentSong?.title ?? "Nothing playing"}
+                </p>
+              </div>
+            </div>
 
-            <h4>Up Next</h4>
-            <QueueList songs={upNext} />
+            <section className="panel-section panel-section--visualizer">
+              <h4>Sound</h4>
+              <PanelVisualizer />
+            </section>
+
+            <section className="panel-section panel-section--queue">
+              <h4>Up Next</h4>
+              <div className="panel-scroll-area">
+                <QueueList songs={upNext} />
+              </div>
+            </section>
+
+            <section className="panel-section panel-section--lyrics">
+              <h4>Lyrics</h4>
+              <div className="panel-scroll-area panel-lyrics">
+                <p>
+                  Lyrics will appear here when they are available for the
+                  current track.
+                </p>
+              </div>
+            </section>
           </>
         )}
 

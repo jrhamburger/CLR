@@ -1,19 +1,87 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { motion } from "framer-motion";
+import {
+  DotsThreeOutline,
+  Play,
+  Sparkle
+} from "@phosphor-icons/react";
 import { supabase } from "../lib/supabase.js";
+import "../styles/Collections.css";
 
-function Collections() {
+const MAP_SLOTS = [
+  { x: 3, y: 15, w: 29, h: 27, tone: "amber", shape: "one" },
+  {
+    x: 28,
+    y: 19,
+    w: 46,
+    h: 44,
+    tone: "violet",
+    shape: "two",
+    featured: true
+  },
+  { x: 67, y: 3, w: 30, h: 29, tone: "rose", shape: "three" },
+  { x: 74, y: 44, w: 25, h: 27, tone: "coral", shape: "four" },
+  { x: 1, y: 56, w: 30, h: 29, tone: "blue", shape: "five" },
+  { x: 25, y: 73, w: 27, h: 25, tone: "orange", shape: "six" },
+  { x: 51, y: 76, w: 25, h: 24, tone: "lilac", shape: "seven" },
+  { x: 75, y: 75, w: 23, h: 26, tone: "teal", shape: "eight" }
+];
+
+function getArtist(track) {
+  return track.artist || track.artists || "Unknown artist";
+}
+
+function getArtwork(track) {
+  return track?.coverArtUrl || track?.cover_art_url || null;
+}
+
+function splitTitle(title) {
+  const words = title.split(" ");
+  if (words.length < 3) return [title];
+  const midpoint = Math.ceil(words.length / 2);
+  return [
+    words.slice(0, midpoint).join(" "),
+    words.slice(midpoint).join(" ")
+  ];
+}
+
+function CollectionArtwork({ collection, className = "" }) {
+  const cover = getArtwork(collection.tracks?.[0]);
+  return (
+    <span
+      className={`collection-artwork ${className}`}
+      style={
+        cover
+          ? { "--collection-art": `url("${cover}")` }
+          : undefined
+      }
+      aria-hidden="true">
+      <span className="collection-artwork__aurora" />
+      <span className="collection-artwork__horizon" />
+      <span className="collection-artwork__grain" />
+    </span>
+  );
+}
+
+function Collections({ onStartQueue }) {
   const [collections, setCollections] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState("");
+  const [selectedId, setSelectedId] = useState(null);
 
   useEffect(() => {
     loadCollections();
   }, []);
 
   async function loadCollections() {
+    setIsLoading(true);
+    setError("");
+
     try {
       const {
         data: { session }
       } = await supabase.auth.getSession();
+      if (!session) return;
 
       const response = await fetch("/api/collections", {
         headers: {
@@ -21,303 +89,247 @@ function Collections() {
         }
       });
 
-      if (!response.ok) {
+      if (!response.ok)
         throw new Error("Could not load collections.");
-      }
 
       const data = await response.json();
       setCollections(data);
-    } catch (error) {
-      console.error(error);
+      setSelectedId(data[0]?.id ?? null);
+    } catch (loadError) {
+      console.error(loadError);
+      setError(
+        "We could not build your collections right now."
+      );
     } finally {
       setIsLoading(false);
     }
   }
 
+  const mappedCollections = useMemo(
+    () =>
+      collections.map((collection, index) => ({
+        ...collection,
+        ...MAP_SLOTS[index % MAP_SLOTS.length],
+        slotIndex: index
+      })),
+    [collections]
+  );
+
+  const selectedCollection =
+    mappedCollections.find(
+      (collection) => collection.id === selectedId
+    ) || mappedCollections[0];
+
+  function startCollection(collection, trackIndex = 0) {
+    if (collection?.tracks?.length)
+      onStartQueue?.(collection.tracks, trackIndex);
+  }
+
+  if (isLoading) {
+    return (
+      <main className="collections-screen collections-screen--status">
+        <div className="collections-loading-orb" />
+        <p>Building your sound worlds...</p>
+      </main>
+    );
+  }
+
+  if (error) {
+    return (
+      <main className="collections-screen collections-screen--status">
+        <p>{error}</p>
+        <button
+          className="collections-retry"
+          onClick={loadCollections}>
+          Try again
+        </button>
+      </main>
+    );
+  }
+
+  if (mappedCollections.length === 0) {
+    return (
+      <main className="collections-screen collections-screen--status">
+        <Sparkle size={30} weight="fill" />
+        <h1>Your collections are waiting</h1>
+        <p>
+          Listen to a few tracks and we’ll start shaping
+          personalized spaces around your taste.
+        </p>
+      </main>
+    );
+  }
+
   return (
-    <div>
-      <h2>Collections</h2>
+    <main className="collections-screen">
+      <section
+        className="collections-workspace"
+        aria-labelledby="collections-heading">
+        <header className="collections-heading">
+          <span className="collections-eyebrow">
+            <Sparkle size={14} weight="fill" /> PERSONALIZED FOR
+            YOU
+          </span>
+          <h1 id="collections-heading">Your Collections</h1>
+          <p>
+            Built from your listening patterns, favorite
+            artists, and new discoveries.
+          </p>
+        </header>
 
-      {isLoading ? (
-        <p>Building your collections...</p>
-      ) : (
-        <section>
-          {collections.map((collection) => (
-            <div key={collection.id}>
-              <h2>{collection.title}</h2>
-              <p>{collection.description}</p>
+        <div
+          className="collections-map"
+          aria-label="Your collection map">
+          <div className="collections-atmosphere collections-atmosphere--one" />
+          <div className="collections-atmosphere collections-atmosphere--two" />
+          <svg
+            className="collection-connections"
+            viewBox="0 0 1000 760"
+            preserveAspectRatio="none"
+            aria-hidden="true">
+            <path d="M80 215 C192 125 219 298 364 233 S484 197 526 248" />
+            <path d="M171 206 C95 372 297 357 281 501 S413 616 531 652" />
+            <path d="M540 238 C653 150 656 88 757 104 S853 214 818 330" />
+            <path d="M524 418 C669 423 653 519 754 539 S836 612 838 663" />
+            <path d="M269 502 C357 462 482 558 573 638 S749 694 795 637" />
+          </svg>
 
-              {collection.tracks.map((track) => (
-                <p key={track.id}>
-                  {track.title} — {track.artist}
-                </p>
-              ))}
-            </div>
-          ))}
-        </section>
-      )}
-    </div>
+          {mappedCollections.map((collection) => {
+            const isSelected =
+              selectedCollection?.id === collection.id;
+            const titleLines = splitTitle(collection.title);
+            const labelStyle = {
+              "--x": `${collection.x}%`,
+              "--y": `${collection.y}%`,
+              "--w": `${collection.w}%`,
+              "--h": `${collection.h}%`
+            };
+
+            return (
+              <motion.article
+                key={collection.id}
+                className={`collection-blob collection-blob--${collection.tone} collection-blob--${collection.shape} ${collection.featured ? "collection-blob--featured" : ""} ${isSelected ? "is-selected" : ""}`}
+                style={labelStyle}
+                initial={{ opacity: 0, scale: 0.82 }}
+                animate={{
+                  opacity: 1,
+                  scale: isSelected ? 1.035 : 1
+                }}
+                transition={{
+                  type: "spring",
+                  stiffness: 170,
+                  damping: 19,
+                  delay: collection.slotIndex * 0.07
+                }}>
+                <button
+                  type="button"
+                  className="collection-blob__select"
+                  onClick={() => setSelectedId(collection.id)}
+                  aria-pressed={isSelected}
+                  aria-label={`Show ${collection.title}`}
+                />
+                <span
+                  className="collection-blob__media"
+                  aria-hidden="true">
+                  <CollectionArtwork collection={collection} />
+                  <span className="collection-blob__wash" />
+                </span>
+                <span className="collection-blob__copy">
+                  <span className="collection-blob__title">
+                    {titleLines.map((line) => (
+                      <span key={line}>{line}</span>
+                    ))}
+                  </span>
+                  <span className="collection-blob__count">
+                    {collection.tracks.length}{" "}
+                    {collection.tracks.length === 1
+                      ? "track"
+                      : "tracks"}
+                  </span>
+                </span>
+                <button
+                  type="button"
+                  className="collection-blob__node"
+                  onClick={() => startCollection(collection)}
+                  aria-label={`Play ${collection.title}`}>
+                  <i />
+                  <Play size={18} weight="fill" />
+                </button>
+              </motion.article>
+            );
+          })}
+        </div>
+      </section>
+
+      <motion.aside
+        className="collection-detail"
+        aria-label="Selected collection details"
+        key={selectedCollection.id}
+        initial={{ opacity: 0, x: 16 }}
+        animate={{ opacity: 1, x: 0 }}
+        transition={{ duration: 0.28, ease: "easeOut" }}>
+        <div
+          className={`collection-detail__art collection-blob--${selectedCollection.tone}`}>
+          <CollectionArtwork collection={selectedCollection} />
+          <span className="collection-detail__art-caption">
+            YOUR SOUND SPACE
+          </span>
+        </div>
+        <div className="collection-detail__title-row">
+          <h2>{selectedCollection.title}</h2>
+          <button
+            className="collection-detail__more"
+            aria-label="More collection options">
+            <DotsThreeOutline size={24} weight="bold" />
+          </button>
+        </div>
+        <p className="collection-detail__description">
+          {selectedCollection.description}
+        </p>
+        <button
+          className="collection-detail__play"
+          onClick={() => startCollection(selectedCollection)}>
+          <span>
+            <Play size={18} weight="fill" />
+          </span>
+          Play collection
+        </button>
+        <div className="collection-detail__rule" />
+        <ol className="collection-track-list">
+          {selectedCollection.tracks
+            .slice(0, 5)
+            .map((track, index) => (
+              <li key={track.id ?? `${track.title}-${index}`}>
+                <button
+                  onClick={() =>
+                    startCollection(selectedCollection, index)
+                  }>
+                  <span
+                    className={`collection-track-list__cover collection-blob--${selectedCollection.tone}`}>
+                    {getArtwork(track) ? (
+                      <img src={getArtwork(track)} alt="" />
+                    ) : (
+                      <CollectionArtwork
+                        collection={{ tracks: [track] }}
+                      />
+                    )}
+                  </span>
+                  <span className="collection-track-list__copy">
+                    <b>{track.title}</b>
+                    <small>{getArtist(track)}</small>
+                  </span>
+                  <Play
+                    className="collection-track-list__play"
+                    size={15}
+                    weight="fill"
+                  />
+                </button>
+              </li>
+            ))}
+        </ol>
+      </motion.aside>
+    </main>
   );
 }
 
 export default Collections;
-
-// import { useMemo, useState } from "react";
-// import "../styles/Collections.css";
-
-// const filters = ["Mood", "Genre", "Energy", "Evolving"];
-
-// const collectionSeeds = [
-//   {
-//     id: "discoveries",
-//     label: "New\nDiscoveries",
-//     tone: "gold",
-//     x: 0,
-//     y: 18,
-//     w: 29,
-//     h: 27
-//   },
-//   {
-//     id: "late-night",
-//     label: "Late-Night\nElectronic",
-//     sublabel: "18 tracks",
-//     tone: "violet",
-//     featured: true,
-//     x: 28,
-//     y: 21,
-//     w: 45,
-//     h: 45
-//   },
-//   {
-//     id: "comfort",
-//     label: "Comfort Zone",
-//     tone: "peach",
-//     x: 63,
-//     y: 2,
-//     w: 31,
-//     h: 30
-//   },
-//   {
-//     id: "energy",
-//     label: "High Energy",
-//     tone: "red",
-//     x: 70,
-//     y: 41,
-//     w: 25,
-//     h: 28
-//   },
-//   {
-//     id: "indie",
-//     label: "Indie /\nAlternative",
-//     tone: "slate",
-//     x: -2,
-//     y: 56,
-//     w: 31,
-//     h: 29
-//   },
-//   {
-//     id: "soulful",
-//     label: "Soulful & Warm",
-//     tone: "orange",
-//     x: 23,
-//     y: 72,
-//     w: 27,
-//     h: 26
-//   },
-//   {
-//     id: "dreamy",
-//     label: "Dreamy",
-//     tone: "lilac",
-//     x: 47,
-//     y: 75,
-//     w: 26,
-//     h: 25
-//   },
-//   {
-//     id: "focus",
-//     label: "Deep Focus",
-//     tone: "teal",
-//     x: 71,
-//     y: 76,
-//     w: 25,
-//     h: 27
-//   }
-// ];
-
-// const demoTracks = [
-//   ["Midnight Drift", "Kairo", "4:32", "violet"],
-//   ["Glass Horizon", "Telen.", "5:21", "lilac"],
-//   ["Falling Light", "Auralis", "4:08", "blue"],
-//   ["Parallel Minds", "Noctil", "6:17", "slate"]
-// ];
-
-// function splitLabel(label) {
-//   return label
-//     .split("\n")
-//     .map((line, index) => (
-//       <span key={line + index}>{line}</span>
-//     ));
-// }
-
-// export default function CollectionsTasteMap({
-//   onPlayCollection,
-//   onTrackSelect,
-//   initialCollection = "late-night"
-// }) {
-//   const [activeFilter, setActiveFilter] = useState("Mood");
-//   const [selectedId, setSelectedId] = useState(
-//     initialCollection
-//   );
-//   const selected = useMemo(
-//     () =>
-//       collectionSeeds.find(
-//         (collection) => collection.id === selectedId
-//       ) ?? collectionSeeds[1],
-//     [selectedId]
-//   );
-
-//   const selectCollection = (collection) =>
-//     setSelectedId(collection.id);
-
-//   return (
-//     <main className="taste-map-screen">
-//       <section
-//         className="taste-map-workspace"
-//         aria-labelledby="collections-heading">
-//         <header className="taste-map-heading">
-//           <h1 id="collections-heading">Your Collections</h1>
-//           <p>
-//             Built around your taste, listening patterns, and
-//             discoveries.
-//           </p>
-//           <div
-//             className="taste-map-tabs"
-//             role="tablist"
-//             aria-label="Collection grouping">
-//             {filters.map((filter) => (
-//               <button
-//                 className={
-//                   activeFilter === filter ? "is-active" : ""
-//                 }
-//                 key={filter}
-//                 onClick={() => setActiveFilter(filter)}
-//                 role="tab"
-//                 aria-selected={activeFilter === filter}>
-//                 {filter}
-//               </button>
-//             ))}
-//           </div>
-//         </header>
-
-//         <div
-//           className="map-stage"
-//           aria-label={`${activeFilter} collection map`}>
-//           <svg
-//             className="map-connections"
-//             viewBox="0 0 1000 760"
-//             preserveAspectRatio="none"
-//             aria-hidden="true">
-//             <path d="M32 224 C145 144 182 298 302 232 S411 202 448 248" />
-//             <path d="M143 210 C83 374 273 354 242 493 S407 603 488 644" />
-//             <path d="M502 235 C626 166 620 84 708 96 S819 212 781 320" />
-//             <path d="M510 414 C657 419 634 511 738 529 S806 609 812 664" />
-//             <path d="M236 498 C345 456 478 558 551 631 S736 689 761 631" />
-//             <path d="M695 315 C619 405 747 394 752 499" />
-//             <path d="M179 636 C178 693 267 735 329 695" />
-//           </svg>
-
-//           {collectionSeeds.map((collection) => (
-//             <button
-//               type="button"
-//               key={collection.id}
-//               className={`collection-orb orb-${collection.tone} ${collection.featured ? "is-featured" : ""} ${selected.id === collection.id ? "is-selected" : ""}`}
-//               style={{
-//                 "--x": `${collection.x}%`,
-//                 "--y": `${collection.y}%`,
-//                 "--w": `${collection.w}%`,
-//                 "--h": `${collection.h}%`
-//               }}
-//               onClick={() => selectCollection(collection)}
-//               aria-pressed={selected.id === collection.id}>
-//               <span className="orb-art" />
-//               <span className="orb-copy">
-//                 <span className="orb-label">
-//                   {splitLabel(collection.label)}
-//                 </span>
-//                 {collection.sublabel && (
-//                   <span className="orb-sublabel">
-//                     {collection.sublabel}
-//                   </span>
-//                 )}
-//               </span>
-//               {collection.featured && (
-//                 <span className="orb-play" aria-hidden="true">
-//                   <span />
-//                 </span>
-//               )}
-//               <span className="orb-node" aria-hidden="true">
-//                 <i />
-//               </span>
-//             </button>
-//           ))}
-//         </div>
-//       </section>
-
-//       {/* <aside
-//         className="collection-detail"
-//         aria-label="Selected collection details">
-//         <div className={`detail-art orb-${selected.tone}`}>
-//           <span />
-//         </div>
-//         <h2>{selected.label.replace("\n", " ")}</h2>
-//         <p>
-//           Atmospheric tracks for when you want something
-//           immersive.
-//         </p>
-//         <div className="detail-actions">
-//           <button
-//             className="detail-play"
-//             onClick={() => onPlayCollection?.(selected)}
-//             aria-label={`Play ${selected.label}`}>
-//             <span />
-//           </button>
-//           <button
-//             className="play-label"
-//             onClick={() => onPlayCollection?.(selected)}>
-//             Play Collection
-//           </button>
-//           <button
-//             className="more-button"
-//             aria-label="More collection options">
-//             •••
-//           </button>
-//         </div>
-//         <div className="detail-rule" />
-//         <ol className="track-list">
-//           {demoTracks.map(([title, artist, duration, tone]) => (
-//             <li key={title}>
-//               <button
-//                 onClick={() =>
-//                   onTrackSelect?.({ title, artist, duration })
-//                 }>
-//                 <span className={`track-cover orb-${tone}`}>
-//                   <i />
-//                 </span>
-//                 <span className="track-copy">
-//                   <b>{title}</b>
-//                   <small>{artist}</small>
-//                 </span>
-//                 <small className="track-duration">
-//                   {duration}
-//                 </small>
-//                 <span className="track-more" aria-hidden="true">
-//                   •••
-//                 </span>
-//               </button>
-//             </li>
-//           ))}
-//         </ol>
-//       </aside> */}
-//     </main>
-//   );
-// }
