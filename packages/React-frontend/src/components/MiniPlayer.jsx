@@ -29,6 +29,9 @@ function MiniPlayer({ queue, modes, controls, user }) {
   const currentTrackIndex = playOrder[playPosition];
   const currentSong = currentQueue[currentTrackIndex];
 
+  // This useEffect function call resets the boolean of the current
+  // track that tracks whether or not a track has been recorded
+  // into the user's listening history.
   useEffect(() => {
 
     hasRecordedCurrentTrack.current = false;
@@ -43,6 +46,25 @@ function MiniPlayer({ queue, modes, controls, user }) {
       .play()
       .then(() => setIsPlaying(true))
       .catch(() => setIsPlaying(false));
+  }, [currentSong]);
+
+  // This useEffect function call allows song metadata to display on a
+  // user's device in their notification panel/control center media player
+  useEffect(() => {
+    if (!("mediaSession" in navigator) || !currentSong) return;
+
+    const coverArtUrl = currentSong.coverArtUrl ?? currentSong.cover_art_url;
+
+    navigator.mediaSession.metadata = new MediaMetadata({
+      title: currentSong.title ?? "Unknown title",
+      artist: currentSong.artist ?? currentSong.artists ?? "Unknown artist",
+      album: "AuxShare",
+      artwork: coverArtUrl ? [{
+        src: coverArtUrl,
+        sizes: "512x512",
+        type: "image/jpeg"
+      }] : []
+    });
   }, [currentSong]);
 
   function togglePlay() {

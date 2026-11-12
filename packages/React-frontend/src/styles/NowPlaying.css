@@ -62,7 +62,7 @@
 .now-playing-panel {
   position: sticky;
   top: 0;
-  height: calc(100svh - var(--player-height));
+  height: calc(100dvh - var(--player-height));
   width: var(--panel-open-width);
   flex-shrink: 0;
   box-sizing: border-box;
@@ -238,7 +238,7 @@
 .panel-reveal-tab {
   position: fixed;
   right: 0;
-  top: calc((100svh - var(--player-height)) / 2);
+  top: calc((100dvh - var(--player-height)) / 2);
   transform: translateY(-50%);
 
   display: flex;
@@ -265,6 +265,10 @@
   opacity: 1;
 }
 
+.mobile-now-playing-launcher {
+  display: none;
+}
+
 /* The full Now Playing column is useful on wide screens, but it should yield
    room to the active page instead of forcing the center column to overflow. */
 @media (max-width: 1180px) {
@@ -274,6 +278,65 @@
 
   .panel-reveal-tab {
     display: none;
+  }
+
+  .mobile-now-playing-launcher {
+    position: fixed;
+    right: 14px;
+    bottom: calc(var(--player-height) + 14px);
+    z-index: 2;
+
+    display: grid;
+    grid-template-columns: 40px minmax(0, 1fr) 17px;
+    align-items: center;
+    gap: 9px;
+    width: min(260px, calc(100vw - 84px));
+    padding: 7px 10px 7px 7px;
+
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    background: color-mix(in srgb, var(--bg) 88%, transparent);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.28);
+    color: var(--text-h);
+    text-align: left;
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    cursor: pointer;
+  }
+
+  .mobile-now-playing-launcher .song-cover {
+    border-radius: 9px;
+  }
+
+  .mobile-now-playing-launcher__copy {
+    display: grid;
+    min-width: 0;
+    gap: 2px;
+  }
+
+  .mobile-now-playing-launcher__copy small {
+    color: var(--text);
+    font-size: 11px;
+  }
+
+  .mobile-now-playing-launcher__copy b {
+    overflow: hidden;
+    font-size: 13px;
+    line-height: 1.2;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .mobile-now-playing-launcher__icon {
+    transform: rotate(180deg);
+  }
+}
+
+@media (max-width: 560px) {
+  .mobile-now-playing-launcher {
+    right: 10px;
+    bottom: calc(var(--player-height) + 10px);
+    width: min(226px, calc(100vw - 76px));
   }
 }
 
