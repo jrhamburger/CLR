@@ -21,6 +21,7 @@ import Socials from "./components/Socials";
 import NowPlaying from "./components/NowPlaying";
 import NowPlayingPanel from "./components/NowPlayingPanel";
 import "./styles/TopNav.css";
+import "./styles/Auth.css";
 
 const TOP_NAV_ITEMS = [
   { label: "Home", screen: SCREENS.HOME },
@@ -206,15 +207,30 @@ function App() {
 
   if (!session) {
     return (
-      <>
-        <nav>
-          <button onClick={() => navigate(SCREENS.SIGN_UP)}>Sign Up</button>
-          <button onClick={() => navigate(SCREENS.SIGN_IN)}>Sign In</button>
+      <div className="auth-shell">
+        {/* On sign-in the nav floats over the full-screen background */}
+        <nav
+          className={`top-nav auth-nav${
+            currentScreen === SCREENS.SIGN_IN ? " auth-nav--overlay" : ""
+          }`}
+        >
+          <button
+            className={currentScreen === SCREENS.SIGN_UP ? "active" : ""}
+            onClick={() => navigate(SCREENS.SIGN_UP)}
+          >
+            Sign Up
+          </button>
+          <button
+            className={currentScreen === SCREENS.SIGN_IN ? "active" : ""}
+            onClick={() => navigate(SCREENS.SIGN_IN)}
+          >
+            Sign In
+          </button>
         </nav>
 
         {currentScreen === SCREENS.SIGN_UP && <SignUp />}
         {currentScreen === SCREENS.SIGN_IN && <SignIn />}
-      </>
+      </div>
     );
   }
 

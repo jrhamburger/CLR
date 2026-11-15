@@ -1,0 +1,54 @@
+/* Signed-out layout: Sign Up / Sign In pills above (or over) the page */
+.auth-shell {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+}
+
+/* Reuses .top-nav pills; centered and given room from the top edge */
+.auth-nav {
+    justify-content: center;
+    padding-top: 24px;
+    margin-bottom: 0;
+}
+
+/* Sign-in: drop the centered column so the background fills the window */
+#root:has(.sign-in-page) {
+    width: 100%;
+    border-inline: none;
+}
+
+.auth-shell .sign-in-page {
+    min-height: 100svh;
+}
+
+/* Float the nav over the dark background instead of pushing it down */
+.auth-nav--overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 2;
+}
+
+/* The sign-in background is always dark, so use light text on it */
+.auth-nav--overlay button {
+    border-color: rgba(255, 255, 255, 0.25);
+    color: #f3f4f6;
+}
+
+.auth-nav--overlay button:hover {
+    border-color: #f3f4f6;
+    background: rgba(255, 255, 255, 0.08);
+}
+
+.auth-nav--overlay button.active {
+    border-color: #c084fc;
+    background: rgba(192, 132, 252, 0.15);
+    color: #c084fc;
+}
+
+.sign-in-page h2 {
+    color: #f3f4f6;
+}

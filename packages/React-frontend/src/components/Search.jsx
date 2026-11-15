@@ -58,7 +58,7 @@ function Search({ session, onStartQueue }) {
     <div>
       <h2>Search</h2>
       <section>
-        <form onSubmit={handleSearch}>
+        <form className="search-form" onSubmit={handleSearch}>
           <input
             type="search"
             value={searchText}

@@ -2,6 +2,7 @@ import { motion } from "framer-motion";
 import { useRef, useState, useEffect } from "react";
 import MusicControls from "./MusicControls";
 import UploadProgress from "./UploadProgress";
+import "../styles/MusicPlayer.css";
 
 function MusicPlayer({
   currentQueue,
@@ -75,13 +76,23 @@ function MusicPlayer({
         </>
       ) : (
         <>
-          <input
-            type="file"
-            multiple
-            accept="audio/*"
-            onChange={onFileUpload}
-            disabled={Boolean(uploadProgress)}
-          />
+          {/* Native input stays for keyboard/a11y; the label is the visible button */}
+          <label
+            className={`upload-button${uploadProgress ? " upload-button--busy" : ""}`}
+          >
+            <input
+              className="upload-input"
+              type="file"
+              multiple
+              accept="audio/*"
+              onChange={onFileUpload}
+              disabled={Boolean(uploadProgress)}
+            />
+            {uploadProgress ? "Uploading…" : "Upload songs"}
+          </label>
+          <p className="upload-hint">
+            MP3, WAV, or any audio file. You can pick several at once.
+          </p>
           {uploadProgress && <UploadProgress {...uploadProgress} />}
           <p>No song selected yet.</p>
         </>
