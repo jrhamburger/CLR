@@ -2,10 +2,7 @@ import { useState, useEffect } from "react";
 import "./App.css";
 import { supabase } from "./lib/supabase";
 import { uploadFiles } from "./lib/fileuploading";
-import {
-  SCREENS,
-  assertValidScreen
-} from "./constants/screens";
+import { SCREENS, assertValidScreen } from "./constants/screens";
 
 import SignUp from "./components/SignUp";
 import MusicPlayer from "./components/MusicPlayer";
@@ -23,7 +20,6 @@ import Collections from "./components/Collections";
 import Socials from "./components/Socials";
 import NowPlaying from "./components/NowPlaying";
 import NowPlayingPanel from "./components/NowPlayingPanel";
-import ListeningHistory from "./components/ListeningHistory";
 import "./styles/TopNav.css";
 
 const TOP_NAV_ITEMS = [
@@ -31,13 +27,10 @@ const TOP_NAV_ITEMS = [
   { label: "Playlists", screen: SCREENS.PLAYLISTS },
   { label: "Player", screen: SCREENS.PLAYER },
   { label: "Now Playing", screen: SCREENS.NOW_PLAYING },
-  { label: "History", screen: SCREENS.HISTORY }
 ];
 
 function App() {
-  const [currentScreen, setCurrentScreen] = useState(
-    SCREENS.SIGN_UP
-  );
+  const [currentScreen, setCurrentScreen] = useState(SCREENS.SIGN_UP);
 
   // Always change screens through this so a bad screen name fails loudly
   function navigate(screen) {
@@ -58,7 +51,6 @@ function App() {
   const [uploadProgress, setUploadProgress] = useState(null); // { done, total } while uploading
   const [panelMode, setPanelMode] = useState("open"); // right column: "open" | "mini" | "hidden"
 
-  const currentTrackIndex = playOrder[playPosition];
   const currentSong = currentQueue[playOrder[playPosition]];
   const upNext = playOrder
     .slice(playPosition + 1)
@@ -83,14 +75,12 @@ function App() {
   };
 
   useEffect(() => {
-    supabase.auth
-      .getSession()
-      .then(({ data }) => setSession(data.session));
-    const { data: listener } = supabase.auth.onAuthStateChange(
-      (_event, session) => {
-        setSession(session);
-        navigate(session ? SCREENS.HOME : SCREENS.SIGN_IN);
-      }
+  supabase.auth.getSession().then(({ data }) => setSession(data.session));
+  const { data: listener } = supabase.auth.onAuthStateChange(
+    (_event, session) => {
+      setSession(session);
+      navigate(session ? SCREENS.HOME : SCREENS.SIGN_IN);
+    }
     );
     return () => listener.subscription.unsubscribe();
   }, []);
@@ -104,7 +94,8 @@ function App() {
     // Reset so the same file(s) can be picked again later
     event.target.value = "";
 
-    if (files.length === 0) return;
+    if (files.length === 0) 
+      return;
 
     setUploadProgress({ done: 0, total: files.length });
 
@@ -115,20 +106,13 @@ function App() {
     );
 
     setUploadProgress(null);
-    setSavedTracks((currentTracks) => [
-      ...uploaded,
-      ...currentTracks
-    ]);
+    setSavedTracks((currentTracks) => [...uploaded, ...currentTracks]);
 
     if (failed.length > 0) {
       console.log(failed);
-      alert(
-        `${uploaded.length} uploaded; ${failed.length} failed.`
-      );
+      alert(`${uploaded.length} uploaded; ${failed.length} failed.`);
     } else {
-      alert(
-        `${uploaded.length} song(s) uploaded successfully.`
-      );
+      alert(`${uploaded.length} song(s) uploaded successfully.`);
     }
   }
 
@@ -142,6 +126,7 @@ function App() {
 
   // TODO: Fix this function
   function handleNextTrack() {
+
     if (playPosition < playOrder.length - 1) {
       setPlayPosition((position) => position + 1);
     } else if (isRepeating) {
@@ -157,6 +142,7 @@ function App() {
       return currentPosition - 1;
     });
   }
+
 
   function handleToggleShuffle() {
     if (!currentSong) return;
@@ -222,12 +208,8 @@ function App() {
     return (
       <>
         <nav>
-          <button onClick={() => navigate(SCREENS.SIGN_UP)}>
-            Sign Up
-          </button>
-          <button onClick={() => navigate(SCREENS.SIGN_IN)}>
-            Sign In
-          </button>
+          <button onClick={() => navigate(SCREENS.SIGN_UP)}>Sign Up</button>
+          <button onClick={() => navigate(SCREENS.SIGN_IN)}>Sign In</button>
         </nav>
 
         {currentScreen === SCREENS.SIGN_UP && <SignUp />}
@@ -251,10 +233,9 @@ function App() {
           {TOP_NAV_ITEMS.map(({ label, screen }) => (
             <button
               key={screen}
-              className={
-                currentScreen === screen ? "active" : ""
-              }
-              onClick={() => navigate(screen)}>
+              className={currentScreen === screen ? "active" : ""}
+              onClick={() => navigate(screen)}
+            >
               {label}
             </button>
           ))}
@@ -263,35 +244,16 @@ function App() {
           </button>
         </nav>
 
-        {currentScreen === SCREENS.HOME && (
-          <Home session={session} onStartQueue={startQueue} />
-        )}
-        {currentScreen === SCREENS.PLAYLISTS && (
-          <Playlists session={session} />
-        )}
-        {currentScreen === SCREENS.SEARCH && (
-          <Search session={session} onStartQueue={startQueue} />
-        )}
+        {currentScreen === SCREENS.HOME && <Home session={session} onStartQueue={startQueue} />}
+        {currentScreen === SCREENS.PLAYLISTS && <Playlists session={session} />}
+        {currentScreen === SCREENS.SEARCH && <Search session={session} onStartQueue={startQueue} />}
         {currentScreen === SCREENS.GENRES && <Genres />}
         {currentScreen === SCREENS.FAVORITES && <Favorites />}
-        {currentScreen === SCREENS.TASTE_PROFILE && (
-          <TasteProfile />
-        )}
-        {currentScreen === SCREENS.COLLECTIONS && (
-          <Collections onStartQueue={startQueue} />
-        )}
+        {currentScreen === SCREENS.TASTE_PROFILE && <TasteProfile />}
+        {currentScreen === SCREENS.COLLECTIONS && <Collections />}
         {currentScreen === SCREENS.SOCIALS && <Socials />}
         {currentScreen === SCREENS.NOW_PLAYING && (
-          <NowPlaying
-            currentSong={currentSong}
-            upNext={upNext}
-          />
-        )}
-        {currentScreen === SCREENS.HISTORY && (
-          <ListeningHistory
-            onTrackClick={startQueue}
-            user={session?.user}
-          />
+          <NowPlaying currentSong={currentSong} upNext={upNext} />
         )}
 
         {currentScreen === SCREENS.PLAYER && (
@@ -310,9 +272,6 @@ function App() {
         <NowPlayingPanel
           mode={panelMode}
           onChangeMode={setPanelMode}
-          onOpenFullNowPlaying={() =>
-            navigate(SCREENS.NOW_PLAYING)
-          }
           currentSong={currentSong}
           upNext={upNext}
         />
@@ -323,7 +282,6 @@ function App() {
           queue={queue}
           modes={modes}
           controls={controls}
-          user={session?.user}
         />
       )}
 

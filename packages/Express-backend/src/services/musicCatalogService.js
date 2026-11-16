@@ -141,12 +141,8 @@ async function searchUserUploads(query, userId) {
   return tracks;
 }
 
-/** TODO: Move addSignedUrlsToUploadedTrack into its own
- * area for modularity.
- */
-
 // Adds a signed url for obtaining coverArtUrl and audioUrl
-export async function addSignedUrlsToUploadedTrack(track) {
+async function addSignedUrlsToUploadedTrack(track) {
   const { data: audioData, error: audioError } = await supabase.storage
     .from(AUDIO_BUCKET)
     .createSignedUrl(track.audio_path, 60 * 60);
