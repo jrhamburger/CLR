@@ -2,6 +2,8 @@ import { getUserTracks } from "../../../Express-backend/src/api/library";
 import { supabase } from "../lib/supabase";
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
+import { ShareNetworkIcon } from "@phosphor-icons/react";
+import ShareTrackDialog from "./ShareTrackDialog";
 
 import "../styles/Home.css";
 
@@ -10,7 +12,7 @@ function Home({ session, onStartQueue }) {
   const [tracks, setTracks] = useState([]);
   const [trackMessage, setTrackMessage] = useState("");
   const [rotations, setRotations] = useState({});
-  const [isLoading, setIsLoading] = useState(true);
+  const [sharing, setSharing] = useState(null);
 
   //Fetching the Username from personal.users.username
   useEffect(() => {
@@ -49,16 +51,16 @@ function Home({ session, onStartQueue }) {
       <section>
         <h3>Your Music</h3>
 
-        {isLoading ? (
-          <p>Loading tracks...</p>
-        ) : tracks.length === 0 ? (
-          <p>You have not uploaded any tracks</p>
-        ) : (
-          <section className="track-grid">
-            {tracks.map((track, index) => (
+        {tracks.length === 0 && (
+          <p>You have not uploaded any tracks yet.</p>
+        )}
+
+        <section className="track-grid">
+          {tracks.map((track, index) => (
+            // Share sits beside the card because buttons can't nest
+            <div className="track-card-wrapper" key={track.id}>
               <motion.button
                 className="track-card"
-                key={track.id}
                 type="button"
                 initial={{ opacity: 0, y: 30 }}
                 animate={{
@@ -94,12 +96,32 @@ function Home({ session, onStartQueue }) {
                 <p>{track.title}</p>
                 <p>{track.artists}</p>
               </motion.button>
-            ))}
-          </section>
-        )}
+
+              <button
+                className="track-share"
+                type="button"
+                title="Share with a friend"
+                onClick={() => setSharing(track)}
+              >
+                <ShareNetworkIcon size={16} />
+              </button>
+            </div>
+          ))}
+        </section>
 
         {trackMessage && <p>{trackMessage}</p>}
       </section>
+
+      {sharing && (
+        <ShareTrackDialog
+          session={session}
+          track={sharing}
+          onClose={(shared) => {
+            if (shared) setTrackMessage(`Shared "${sharing.title}".`);
+            setSharing(null);
+          }}
+        />
+      )}
     </div>
   );
 }

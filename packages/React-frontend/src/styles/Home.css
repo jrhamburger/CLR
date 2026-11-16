@@ -24,3 +24,38 @@
     width: 100%;
     border-radius: 15px;
 }
+/* Holds the card plus its share button */
+.track-card-wrapper {
+    position: relative;
+    perspective: 1000px;
+}
+
+.track-card-wrapper .track-card {
+    width: 100%;
+}
+
+/* Share button shows in the card's corner on hover, like playlist delete */
+.track-share {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    display: flex;
+    padding: 6px;
+
+    border: none;
+    border-radius: 50%;
+    background: var(--bg);
+    color: var(--text-h);
+    opacity: 0;
+    cursor: pointer;
+    transition: opacity 0.15s ease, color 0.15s ease;
+}
+
+.track-card-wrapper:hover .track-share,
+.track-share:focus-visible {
+    opacity: 1;
+}
+
+.track-share:hover {
+    color: var(--accent);
+}
