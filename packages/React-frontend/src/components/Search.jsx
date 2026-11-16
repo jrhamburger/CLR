@@ -58,7 +58,7 @@ function Search({ session, onStartQueue }) {
     <div>
       <h2>Search</h2>
       <section>
-        <form onSubmit={handleSearch}>
+        <form onSubmit={handleSearch} className="search-area">
           <input
             type="search"
             value={searchText}
@@ -66,9 +66,10 @@ function Search({ session, onStartQueue }) {
               setSearchText(event.target.value)
             }
             placeholder="Search songs or artists"
+            className="search-box"
           />
 
-          <button type="submit" disabled={isSearching}>
+          <button type="submit" disabled={isSearching} className="search-button">
             {isSearching ? "Searching..." : "Search"}
           </button>
         </form>

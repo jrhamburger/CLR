@@ -7,8 +7,6 @@ export async function getUserTracks(accessToken) {
 
     const data = await response.json();
 
-    console.log(data);
-
     if (!response.ok) {
         throw new Error(data.error ?? "Could not load your tracks.");
     }

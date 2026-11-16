@@ -51,8 +51,8 @@ function Sidebar({ isOpen, onToggle, currentScreen, onNavigate, currentSong }) {
       {/* Now playing: shows coverUrl once songs have metadata, placeholder until then */}
       <div className="sidebar-now-playing">
         <div className="sidebar-cover">
-          {currentSong?.coverUrl ? (
-            <img src={currentSong.coverUrl} alt={currentSong.title} />
+          {currentSong?.coverArtUrl ? (
+            <img src={currentSong.coverArtUrl} alt={currentSong.title} />
           ) : (
             <MusicNoteIcon size={isOpen ? 40 : 22} />
           )}

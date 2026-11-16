@@ -1,9 +1,12 @@
 import { motion } from "framer-motion";
 import { useRef, useState, useEffect } from "react";
+import { recordHistory } from "../lib/recordHistory.js";
+
 import MusicControls from "./MusicControls";
 
-function MiniPlayer({ queue, modes, controls }) {
+function MiniPlayer({ queue, modes, controls, user }) {
   const audioRef = useRef(null);
+  const hasRecordedCurrentTrack = useRef(false);
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
@@ -26,6 +29,14 @@ function MiniPlayer({ queue, modes, controls }) {
   const currentTrackIndex = playOrder[playPosition];
   const currentSong = currentQueue[currentTrackIndex];
 
+  // This useEffect function call resets the boolean of the current
+  // track that tracks whether or not a track has been recorded
+  // into the user's listening history.
+  useEffect(() => {
+
+    hasRecordedCurrentTrack.current = false;
+  }, [currentSong?.id]);
+
   useEffect(() => {
     if (!currentSong || !audioRef.current) return;
 
@@ -35,6 +46,25 @@ function MiniPlayer({ queue, modes, controls }) {
       .play()
       .then(() => setIsPlaying(true))
       .catch(() => setIsPlaying(false));
+  }, [currentSong]);
+
+  // This useEffect function call allows song metadata to display on a
+  // user's device in their notification panel/control center media player
+  useEffect(() => {
+    if (!("mediaSession" in navigator) || !currentSong) return;
+
+    const coverArtUrl = currentSong.coverArtUrl ?? currentSong.cover_art_url;
+
+    navigator.mediaSession.metadata = new MediaMetadata({
+      title: currentSong.title ?? "Unknown title",
+      artist: currentSong.artist ?? currentSong.artists ?? "Unknown artist",
+      album: "AuxShare",
+      artwork: coverArtUrl ? [{
+        src: coverArtUrl,
+        sizes: "512x512",
+        type: "image/jpeg"
+      }] : []
+    });
   }, [currentSong]);
 
   function togglePlay() {
@@ -108,6 +138,36 @@ function MiniPlayer({ queue, modes, controls }) {
     toggleRepeat();
   }
 
+  // Handles recording the current track to the history if enough meeaningful data has
+  // been recorded
+  async function handleTimeUpdate() {
+    if (!audioRef.current || !currentSong) return;
+
+    const playbackTime = audioRef.current.currentTime;
+
+    setCurrentTime(playbackTime);
+
+    const hasPlayedEnough = playbackTime >= 30;
+
+    if (!hasPlayedEnough || hasRecordedCurrentTrack.current) {
+      return;
+    }
+
+    hasRecordedCurrentTrack.current = true;
+
+    try {
+      await recordHistory(user.id, currentSong.id);
+    } catch (error) {
+      console.error(
+        "Could not record listening history:",
+        error
+      );
+
+      // Allows another attempt if the database request failed.
+      hasRecordedCurrentTrack.current = false;
+    }
+  }
+
   function onEnded() {
     if (!audioRef.current || !currentSong) return;
     nextTrack();
@@ -123,9 +183,7 @@ function MiniPlayer({ queue, modes, controls }) {
             onPlay={() => setIsPlaying(true)}
             onPause={() => setIsPlaying(false)}
             onEnded={() => onEnded()}
-            onTimeUpdate={() =>
-              setCurrentTime(audioRef.current.currentTime)
-            }
+            onTimeUpdate={handleTimeUpdate}
             onLoadedMetadata={() =>
               setDuration(audioRef.current.duration)
             }

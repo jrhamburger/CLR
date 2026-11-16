@@ -32,8 +32,11 @@ function Home({ session, onStartQueue }) {
           session.access_token
         );
         setTracks(userTracks);
+        setIsLoading(false);
       } catch (error) {
         setTrackMessage(error.message);
+      } finally {
+        setIsLoading(false);
       }
     }
 
@@ -63,17 +66,17 @@ function Home({ session, onStartQueue }) {
                 animate={{
                   opacity: 1,
                   y: 0,
-                  rotateY: rotations[track.id] || 0,
+                  rotateY: rotations[track.id] || 0
                 }}
                 transition={{
                   type: "spring",
                   stiffness: 100,
-                  damping: 15,
+                  damping: 15
                 }}
                 whileHover={{
                   y: -10,
                   scale: 1.04,
-                  rotateY: 360,
+                  rotateY: 360
                 }}
                 whileTap={{
                   scale: 0.95,
@@ -81,11 +84,10 @@ function Home({ session, onStartQueue }) {
                   transition: {
                     type: "spring",
                     duration: 0.1,
-                    bounce: 0,
-                  },
+                    bounce: 0
+                  }
                 }}
-                onClick={() => onStartQueue(tracks, index)}
-              >
+                onClick={() => onStartQueue(tracks, index)}>
                 <img
                   src={track.coverArtUrl}
                   alt={`${track.title} cover art`}

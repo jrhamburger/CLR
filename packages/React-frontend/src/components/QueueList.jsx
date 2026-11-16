@@ -5,8 +5,8 @@ import "../styles/NowPlaying.css";
 export function SongCover({ song, size }) {
   return (
     <div className="song-cover" style={{ width: size, height: size }}>
-      {song?.coverUrl ? (
-        <img src={song.coverUrl} alt={song.title} />
+      {song?.coverArtUrl ? (
+        <img src={song.coverArtUrl} alt={song.title} />
       ) : (
         <MusicNoteIcon size={size / 2.5} />
       )}
