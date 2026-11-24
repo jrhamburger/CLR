@@ -22,6 +22,8 @@ import NowPlaying from "./components/NowPlaying";
 import NowPlayingPanel from "./components/NowPlayingPanel";
 import "./styles/TopNav.css";
 
+import { createShuffleOrder } from "./utils/playback";
+
 const TOP_NAV_ITEMS = [
   { label: "Home", screen: SCREENS.HOME },
   { label: "Playlists", screen: SCREENS.PLAYLISTS },
@@ -147,22 +149,13 @@ function App() {
   function handleToggleShuffle() {
     if (!currentSong) return;
 
+    const currentTrackIndex = playOrder[playPosition];
+
     if (!isShuffle) {
       const shuffledOrder = createShuffleOrder(
-        currentQueue.length
+        currentQueue.length,
+        currentTrackIndex,
       );
-
-      const currentPositionInOrder = shuffledOrder.indexOf(
-        currentTrackIndex
-      );
-
-      [
-        shuffledOrder[0],
-        shuffledOrder[currentPositionInOrder]
-      ] = [
-        shuffledOrder[currentPositionInOrder],
-        shuffledOrder[0]
-      ];
 
       setPlayOrder(shuffledOrder);
       setPlayPosition(0);
@@ -182,26 +175,6 @@ function App() {
     } else {
       setIsRepeating(true);
     }
-  }
-
-  function createShuffleOrder(queueLength) {
-    const order = Array.from(
-      { length: queueLength },
-      (_, index) => index
-    );
-
-    for (let index = order.length - 1; index > 0; --index) {
-      const randomIndex = Math.floor(
-        Math.random() * (index + 1)
-      );
-
-      [order[index], order[randomIndex]] = [
-        order[randomIndex],
-        order[index]
-      ];
-    }
-
-    return order;
   }
 
   if (!session) {
