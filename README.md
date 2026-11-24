@@ -6,6 +6,4 @@ We're creating a customizable music-collection web app where users can explore a
 
 ## TE7: Testing
 
-- **Red:** Added a test requiring the current track to stay first in the shuffled order. Confirmed it failed.
-- **Green:** Updated `createShuffleOrder()` to accept the current track index and place it first. All five tests passed.
-- **Refactor:** Removed duplicate swapping logic from `App.jsx` and passed the current track index into the helper.
+See [TESTING.md](./TESTING.md) for test setup, commands, and the TDD workflow.
